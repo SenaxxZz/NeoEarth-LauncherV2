@@ -34,14 +34,12 @@
     "win": {
       "icon": "./assets/icon/logo.png",
       "publisherName": "NeoEarth-MC",
-      "target": "nsis",
-      "arch": "x64"
+      "target": "nsis"
     },
     "mac": {
       "icon": "./assets/icon/logo.png",
       "target": ["dmg", "zip"],
-      "category": "public.app-category.games",
-      "arch": "x64"
+      "category": "public.app-category.games"
     },
     "nsis": {
       "oneClick": false,
