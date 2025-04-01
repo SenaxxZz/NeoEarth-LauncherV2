@@ -10,49 +10,47 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest, macos-latest]
-        arch: [x64, arm64]
-        exclude:
-          - os: windows-latest
-            arch: arm64 
+        arch: [x64]
+        # macOS does not support arm64 architecture directly
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout du code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Configuration Node.js
+      - name: Configure Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: 'npm'
 
-      - name: Installation des dépendances
+      - name: Install dependencies
         run: npm install
 
-      - name: Build Windows (x64/arm64)
+      - name: Build Windows (x64)
         if: runner.os == 'Windows'
-        run: npm run build:win -- --arch ${{ matrix.arch }}
+        run: npm run build:win -- --arch x64
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build macOS (x64/arm64)
+      - name: Build macOS (x64)
         if: runner.os == 'macOS'
-        run: npm run build:mac -- --arch ${{ matrix.arch }}
+        run: npm run build:mac -- --arch x64
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload artefacts Windows
+      - name: Upload artifacts for Windows
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@v4
         with:
-          name: NeoEarth-Windows-${{ matrix.arch }}
+          name: NeoEarth-Windows-x64
           path: dist/*.exe
 
-      - name: Upload artefacts macOS
+      - name: Upload artifacts for macOS
         if: runner.os == 'macOS'
         uses: actions/upload-artifact@v4
         with:
-          name: NeoEarth-Mac-${{ matrix.arch }}
+          name: NeoEarth-Mac-x64
           path: |
             dist/*.dmg
             dist/*.zip
