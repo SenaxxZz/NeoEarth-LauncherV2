@@ -29,13 +29,13 @@ jobs:
 
       - name: Build Windows (x64)
         if: runner.os == 'Windows'
-        run: npm run build:win -- --arch x64
+        run: npm run build:win
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build macOS (x64)
         if: runner.os == 'macOS'
-        run: npm run build:mac -- --arch x64
+        run: npm run build:mac
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
