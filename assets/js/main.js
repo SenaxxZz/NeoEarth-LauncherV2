@@ -1,7 +1,6 @@
 const { Client, Authenticator } = require("minecraft-launcher-core");
 const launcher = new Client();
 const fs = require("fs");
-const path = require("path");
 require('dotenv').config();
 const { xml2json } = require("xml-js");
 const { formToJSON } = require("axios");
