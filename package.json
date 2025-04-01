@@ -39,6 +39,7 @@
     "mac": {
       "icon": "./assets/icon/logo.png",
       "target": ["dmg", "zip"],
+      "arch": ["x64", "arm64"],
       "category": "public.app-category.games"
     },
     "nsis": {
