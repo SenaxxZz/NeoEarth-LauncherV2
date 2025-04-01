@@ -7,8 +7,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
-    "win": "electron-builder --windows",
-    "mac": "electron-builder --mac"
+    "build:win": "electron-builder --windows --config",
+    "build:mac": "electron-builder --mac --config"
   },
   "keywords": [],
   "author": "NeoEarth-MC",
@@ -30,27 +30,28 @@
     "nodejs-file-downloader": "^4.13.0",
     "xml-js": "^1.6.11"
   },
-"build": {
-  "defaultArch": "x64",  
-  "win": {
-    "icon": "./assets/icon/logo.png",
-    "publisherName": "NeoEarth-MC",
-    "target": "nsis"
-  },
-  "mac": {
-    "icon": "./assets/icon/logo.png",
-    "target": ["dmg", "zip"],
-    "category": "public.app-category.games"
-  },
-  "nsis": {
-    "oneClick": false,
-    "allowToChangeInstallationDirectory": true,
-    "perMachine": true,
-    "runAfterFinish": true,
-    "uninstallDisplayName": "NeoEarth-MC",
-    "createDesktopShortcut": true,
-    "createStartMenuShortcut": true,
-    "shortcutName": "NeoEarth"
-    }  
+  "build": {
+    "win": {
+      "icon": "./assets/icon/logo.png",
+      "publisherName": "NeoEarth-MC",
+      "target": "nsis",
+      "arch": ["x64", "arm64"]  // Support x64 et ARM64
+    },
+    "mac": {
+      "icon": "./assets/icon/logo.png",
+      "target": ["dmg", "zip"],
+      "category": "public.app-category.games",
+      "arch": ["x64", "arm64"]  // Support Intel et Apple Silicon
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": true,
+      "runAfterFinish": true,
+      "uninstallDisplayName": "NeoEarth-MC",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "NeoEarth"
+    }
   }
 }
