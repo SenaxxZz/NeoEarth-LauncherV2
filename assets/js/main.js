@@ -256,9 +256,7 @@ document.getElementById("launch")?.addEventListener("click", async () => {
     let filesInstalled = 0;
     var temp = true;
     
-    // Détection de la plateforme pour choisir le bon endpoint
-    const platform = process.platform === 'darwin' ? 'mac' : 'win';
-    const response = await axios.get(`https://apiprod.neoearth-mc.fr/launcher/version/neoearth-mc/${platform}`);
+    const response = await axios.get(`https://apiprod.neoearth-mc.fr/launcher/version/neoearth-mc/win`);
     
     const files = response.data.files;
     const totalFiles = response.data.totalFiles;
