@@ -5,7 +5,6 @@ require('dotenv').config();
 const { xml2json } = require("xml-js");
 const { formToJSON } = require("axios");
 
-const dataPath = path.join(app.getPath('userData'), ".neoearth-mc");
 let modsList = [];
 fs.readdir(path.join(dataPath, "mods"), (err, modList) => {
     if (err) return;
