@@ -1,61 +1,58 @@
-name: Build Application
+name: Build Multi-Arch
 
 on:
   push:
-    branches: [ main, master ]
-    tags: [ 'v*' ]  # Se déclenche sur les tags commençant par v (ex: v1.0.0)
-  pull_request:
-    branches: [ main, master ]
-  workflow_dispatch:  # Permet de déclencher manuellement
+    tags: [ 'v*.*.*' ]  # Déclenché uniquement sur les tags sémantiques (ex: v1.0.0)
+  workflow_dispatch:
 
 jobs:
   build:
     strategy:
       matrix:
         os: [windows-latest, macos-latest]
+        arch: [x64, arm64]
+        exclude:
+          - os: windows-latest
+            arch: arm64  # Windows ARM64 nécessite des outils spécifiques (optionnel)
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout repository
+      - name: Checkout du code
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Configuration Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22  # Spécifie la version de Node.js
+          node-version: 22
           cache: 'npm'
 
-      - name: Install dependencies
+      - name: Installation des dépendances
         run: npm install
 
-      - name: Build Windows (NSIS)
+      - name: Build Windows (x64/arm64)
         if: runner.os == 'Windows'
-        run: npm run win
+        run: npm run build:win -- --arch ${{ matrix.arch }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Ajouter cette option pour ne pas publier automatiquement
-          CSC_IDENTITY_AUTO_DISCOVERY: false
 
-      - name: Build macOS (DMG + ZIP)
+      - name: Build macOS (x64/arm64)
         if: runner.os == 'macOS'
-        run: npm run mac
+        run: npm run build:mac -- --arch ${{ matrix.arch }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Ajouter cette option pour ne pas publier automatiquement
-          CSC_IDENTITY_AUTO_DISCOVERY: false
 
-      - name: Upload build artifacts (Windows)
+      - name: Upload artefacts Windows
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@v4
         with:
-          name: NeoEarth-Windows
+          name: NeoEarth-Windows-${{ matrix.arch }}
           path: dist/*.exe
 
-      - name: Upload build artifacts (macOS)
+      - name: Upload artefacts macOS
         if: runner.os == 'macOS'
         uses: actions/upload-artifact@v4
         with:
-          name: NeoEarth-Mac
+          name: NeoEarth-Mac-${{ matrix.arch }}
           path: |
             dist/*.dmg
             dist/*.zip
