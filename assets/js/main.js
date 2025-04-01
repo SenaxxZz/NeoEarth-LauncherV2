@@ -320,7 +320,7 @@ document.getElementById("launch")?.addEventListener("click", async () => {
         
         // Chemin Java adapté à la plateforme
         const javaPath = process.platform === 'darwin' 
-            ? path.join(dataPath, "jre1.8.0_381/Contents/Home/bin/java")
+            ? path.join(dataPath, "jre1.8.0_381/bin/java")
             : path.join(dataPath, "jre1.8.0_381/bin/java");
             
         let opts = {
