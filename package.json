@@ -31,6 +31,7 @@
     "xml-js": "^1.6.11"
   },
 "build": {
+  "defaultArch": "x64",  // Ajoutez cette ligne pour spécifier l'architecture
   "win": {
     "icon": "./assets/icon/logo.png",
     "publisherName": "NeoEarth-MC",
@@ -50,6 +51,5 @@
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
     "shortcutName": "NeoEarth"
-    }
   }
 }
