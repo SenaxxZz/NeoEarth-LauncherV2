@@ -1,0 +1,52 @@
+name: Build NeoEarth-MC Launcher
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Windows (NSIS)
+        if: matrix.os == 'windows-latest'
+        run: npm run win
+
+      - name: Build macOS (DMG + ZIP)
+        if: matrix.os == 'macos-latest'
+        run: npm run mac
+
+      - name: Upload build artifacts (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: NeoEarth-Windows
+          path: dist/*.exe
+
+      - name: Upload build artifacts (macOS)
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: NeoEarth-Mac
+          path: dist/*.dmg

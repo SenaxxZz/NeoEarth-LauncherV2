@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset='utf-8'>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+  <meta name='viewport' content='width=device-width, initial-scale=1'>
+  <link rel='stylesheet' type='text/css' media='screen' href='../assets/css/main.css'>
+  <script src="https://kit.fontawesome.com/e51577e716.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+  <div class="navbar">
+    <div class="navbar-left-section">
+      <!-- Côté gauche de la navbar, peut contenir logo ou autre -->
+    </div>
+    
+    <div class="navbar-center">
+      <i class="fa-solid fa-globe navbar-icon" id="menuBtn"></i>
+    </div>
+    
+    <div class="navbar-right-section">
+      <i class="fa-solid fa-window-minimize navbar-icon window-control" id="minimize"></i>
+      <i class="fa-solid fa-expand navbar-icon window-control" id="maximize"></i>
+      <i class="fa-solid fa-xmark navbar-icon window-control" id="close"></i>
+    </div>
+  </div>
+<ul id="menu" class="social-menu hidden">
+  <li id="link-discord"><img src="../assets/icon/discord.webp" alt=""> Discord</li>
+  <li id="link-twitter"><img src="../assets/icon/twitter.webp" alt=""> Twitter</li>
+  <li id="link-tiktok"><img src="../assets/icon/tiktok.webp" alt=""> Tiktok</li>
+  <li id="link-youtube"><img src="../assets/icon/youtube.webp" alt=""> Youtube</li>
+  <li id="link-twitch"><img src="../assets/icon/twitch.webp" alt=""> Twitch</li>
+</ul>
+  </div>
+  <nav class="navbar-left">
+    <ul>
+      <li><a href=""><i class="fa-solid fa-house"></i></a></li>
+      <li><a href="./settings.html"><i class="fa-sharp fa-solid fa-gears"></i></a></li>
+      <li><a href="./servers.html"><i class="fa-solid fa-server"></i></a></li>
+      <li><i class="fa-solid fa-book" id="rules"></i></li>
+      <li><i class="fa-solid fa-radio" id="radio"></i></li>
+      <li><i class="fa-solid fa-arrow-right-from-bracket" id="disconnect"></i></li>
+    </ul>
+  </nav>
+  
+  <!-- Ajout de la card player -->
+  <div class="card-player">
+    <div class="avatar-container">
+      <img src="https://minotar.net/avatar/MHF_Steve/100.png" alt="" class="avatar" id="avatar">
+      <span class="status-indicator"></span>
+    </div>
+    <div class="player-info">
+      <h2 id="username">Player</h2>
+      <h3 id="rank">Joueur</h3>
+    </div>
+  </div>
+  
+  <div class="container">
+    <h1>NeoEarth-MC</h1>
+    <button class="launch" id="launch"><i class="fa-solid fa-play"></i>Lancer</button>
+    <div class="cards-container" id="cards-container">
+    </div>
+  </div>
+<div class="LogConsole" id="LogConsole">
+  <img src="../assets/icon/logo.png" alt="" class="logo">
+  <i class="fa-solid fa-circle-xmark" id="close-error"></i>
+  <div class="eventLog" id="eventLog">
+
+  </div>
+</div>
+</body>
+
+<script src="../assets/js/preload.js"></script>
+<script src="../assets/js/main.js"></script>
+<script src="../assets/js/disconnect.js"></script>
+
+</html>

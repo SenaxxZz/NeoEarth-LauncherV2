@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset='utf-8'>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+  <meta name='viewport' content='width=device-width, initial-scale=1'>
+  <link rel='stylesheet' type='text/css' media='screen' href='../assets/css/settings.css'>
+  <script src="https://kit.fontawesome.com/e51577e716.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+  <div class="overlay"></div>
+  <nav class="navbar-left">
+    <ul>
+      <li><a href="./index.html"><i class="fa-solid fa-house"></i></a></li>
+      <li><a href="./settings.html"><i class="fa-sharp fa-solid fa-gears"></i></a></li>
+      <li><a href="./servers.html"><i class="fa-solid fa-server"></i></a></li>
+      <li><i class="fa-solid fa-book" id="rules"></i></li>
+      <li><i class="fa-solid fa-radio" id="radio"></i></li>
+      <li><i class="fa-solid fa-arrow-right-from-bracket" id="disconnect"></i></li>
+    </ul>
+  </nav>
+  <menu class="bar">
+    <ul>
+      <li>
+        <h4 id="ram">Mémoire RAM</h4>
+      </li>
+      <li>
+        <h4 id="mods-additionnels">Mods Additionnels</h4>
+      </li>
+      <li>
+        <h4 id="ressources-pack">Pack de ressources</h4>
+      </li>
+      <li>
+        <h4 id="shaders">Shaders</h4>
+      </li>
+      <li>
+        <h4 id="parametres">Paramètres</h4>
+      </li>
+      <li>
+        <h4 id="profil">Profil</h4>
+      </li>
+      <li>
+        <h4 style="position: absolute; top: 80%;" id="disconnect1">Se déconnecter</h4>
+      </li>
+    </ul>
+  </menu>
+  <menu style="display: none;" id="menu">
+    <div class="SettingsRam" id="SettingsRam" style="display: none;">
+      <h2>Mémoire RAM</h2>
+
+      <label class="divers">Mémoire RAM Minimum :</label>
+      <select id="RamMin" name="RamMin">
+        <option value="1" selected>1 Go</option>
+        <option value="2">2 Go</option>
+        <option value="3">3 Go</option>
+        <option value="4">4 Go</option>
+        <option value="5">5 Go</option>
+        <option value="6">6 Go</option>
+        <option value="7">7 Go</option>
+        <option value="8">8 Go</option>
+        <option value="9">9 Go</option>
+        <option value="10">10 Go</option>
+      </select>
+      <label class="divers">Mémoire RAM Maximum :</label>
+      <select id="RamMax" name="RamMax">
+        <option value="1">1 Go</option>
+        <option value="2" selected>2 Go</option>
+        <option value="3">3 Go</option>
+        <option value="4">4 Go</option>
+        <option value="5">5 Go</option>
+        <option value="6">6 Go</option>
+        <option value="7">7 Go</option>
+        <option value="8">8 Go</option>
+        <option value="9">9 Go</option>
+        <option value="10">10 Go</option>
+      </select>
+    </div>
+    <div class="SettingsModsAddionnel" id="SettingsModsAddionnel">
+    <div class="parent-container">
+      <h2>Mods Additionnels</h2>
+    </div>
+    </div>
+
+    <div class="SettingsSrcPack" id="SettingsSrcPack">
+      <h2>Ressources Pack</h2>
+      <button id="copyFileButton">Accéder à un fichier</button>
+    </div>
+
+    <div class="SettingsShaders" id="SettingsShaders">
+      <h2>Shaders</h2>
+      <button id="copyFileButton1">Accéder à un fichier</button>
+    </div>
+
+    <div class="SettingsLauncher" id="SettingsLauncher">
+      <h2>Paramètres</h2>
+      <label class="divers">Garder le launcher ouvert après le lancement du jeu :</label><input type="checkbox" name="" class="option-launcher" id="option-launcher">
+      <br>
+      <label class="divers">Mettre en arrière plan le launcher :</label><input type="checkbox" name="" class="option-launcher" id="option-hide">
+    </div>
+
+    <div class="ProfilAccount" id="ProfilAccount" style="display: none;">
+      <h2>Votre Profil</h2>
+      <div class="box-card">
+        <p id="username"></p>
+        <p id="uuid"></p>
+        <img src="https://minotar.net/helm/MHF_Steve/100.png" alt="" id="head">
+      </div>
+      <img src="https://minotar.net/armor/body/MHF_Steve/100.png" alt="" id="skin">
+    </div>
+  </menu>
+</body>
+<script src="../assets/js/settings.js"></script>
+
+</html>

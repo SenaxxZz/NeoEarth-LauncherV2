@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Connexion | NeoEarth</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' media='screen' href='../assets/css/login.css'>
+    <script src="https://kit.fontawesome.com/e51577e716.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <div class="overlay"></div>
+
+    <div id="message" class="message">
+   <i class="fa-solid fa-circle-exclamation" id="info-error"></i>
+        <i class="fa-solid fa-circle-xmark" id="close-login-error" type="button"></i>
+        <h1 class="error-message" id="error-message"></h1>
+    </div>
+    
+    <div class="form-container" id="form-container">
+        <i class="fa-solid fa-users" id="users"></i>
+        <h1>Page de connexion</h1>
+        <div class="form-login">
+            <form action="" method="get">
+                <input type="email" name="email" id="email" placeholder="Adresse Email" required>
+                <input type="password" name="password" id="password" minlength="8" placeholder="Mot de passe" required>
+                <button type="submit" class="submit-login" id="submit-login">Se connecter</button>
+
+                <h5 class="password-reset" id="password-reset">Mot de passe oublié ?</h5>
+                <div class="box-icons">
+                    <div>
+                        <i class="fa-solid fa-envelope"></i>
+                    </div>
+                    <div>
+                        <i class="fa-solid fa-lock"></i>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+<script src='../assets/js/login.js'></script>
+<script src="../assets/js/preload.js"></script>

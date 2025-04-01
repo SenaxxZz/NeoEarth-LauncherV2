@@ -1,0 +1,902 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+body {
+    background: url("../icon/minecraft-map-screenshot.png") no-repeat center center fixed;
+    background-size: cover;
+    overflow: hidden;
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+    height: 100vh;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.6));
+    backdrop-filter: blur(8px);
+    z-index: 0;
+}
+
+/*-------------------------------------*\
+  LEFT SIDEBAR NAVIGATION
+\*-------------------------------------*/
+
+.navbar-left {
+    position: fixed;
+    left: 0;
+    right: auto;
+    top: 0;
+    width: 5rem;
+    height: 100vh;
+    background: linear-gradient(to bottom, rgba(25, 25, 25, 0.97), rgba(12, 12, 12, 0.97));
+    box-shadow: 3px 0 20px rgba(0, 0, 0, 0.6);
+    border-right: 1px solid rgba(255, 255, 255, 0.07);
+    border-left: none;
+    z-index: 150; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 5rem; /* Augmenté pour faire de la place au logo */
+}
+
+.navbar-left:before {
+    display: block; /* Afficher au lieu de cacher */
+    content: '';
+    position: absolute;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 3rem;
+    height: 3rem;
+    background: url("../icon/logo.png") no-repeat center center;
+    background-size: contain;
+    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.5));
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.navbar-left:hover:before {
+    transform: translateX(-50%) scale(1.1);
+    filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.6)) brightness(1.1);
+}
+
+nav ul {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    height: 100%; /* Keep full height to allow flex positioning */
+    position: relative;
+}
+
+nav li {
+    list-style-type: none;
+    margin: 0.6rem 0; /* Further reduced margin for better spacing */
+    padding: 0.6rem 0;
+    width: 100%;
+    text-align: center;
+    transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+nav li.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 3px;
+    background: linear-gradient(to bottom, #2ecc71, #27ae60);
+    border-radius: 0 3px 3px 0;
+    box-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
+    animation: glow 2s infinite;
+}
+
+nav li.active i {
+    color: #2ecc71;
+    text-shadow: 0 0 10px rgba(46, 204, 113, 0.3);
+}
+
+nav li:not(:last-child) {
+    margin: 0.4rem 0; /* Reduced margin to fit them closer to the top */
+    padding: 0.6rem 0;
+}
+
+nav a {
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.3rem; /* Reduced from 1.9rem to match icon size */
+    transition: all 0.3s ease;
+    display: block;
+    width: 100%;
+}
+
+nav li i {
+    font-size: 1.3rem;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+}
+
+nav li:hover {
+    background-color: rgba(46, 204, 113, 0.15);
+}
+
+nav li::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 0;
+    background: linear-gradient(to top, rgba(46, 204, 113, 0.1), transparent);
+    transition: all 0.3s ease;
+    z-index: -1;
+}
+
+nav li:hover::after {
+    height: 100%;
+}
+
+
+nav li:hover i,
+nav li:hover a {
+    color: #2ecc71;
+    transform: translateY(-2px);
+    text-shadow: 0 0 12px rgba(46, 204, 113, 0.5);
+}
+
+
+/* FIXED: Disconnect Button with proper half-width highlight */
+nav li#disconnect1,
+nav li:last-child {
+    margin-top: auto; /* Push to the bottom */
+    position: relative;
+    margin-bottom: 0; /* Changed from 0.5rem to match main.css */
+    width: 100%;
+    text-align: center;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    overflow: visible; /* Allow animation overflow */
+}
+
+
+/* Hide default hover background for disconnect button only */
+nav li#disconnect1:hover,
+nav li:last-child:hover {
+    background-color: rgba(255, 120, 120, 0.15);
+}
+
+/* Edge indicator with better positioning */
+nav li#disconnect1::after,
+nav li:last-child::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 0;
+    background: linear-gradient(to bottom, #e74c3c, #c0392b);
+    transition: height 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 0 3px 3px 0;
+    z-index: 1; /* Above the background but below the icon */
+    animation: edgePulse 1.5s infinite alternate;
+}
+
+nav li#disconnect1:hover::after,
+nav li:last-child:hover::after {
+    height: 70%;
+    box-shadow: 0 0 10px rgba(231, 76, 60, 0.7);
+    animation: edgePulse 1.5s infinite alternate;
+}
+
+@keyframes edgePulse {
+    0% { box-shadow: 0 0 5px rgba(231, 76, 60, 0.5); }
+    100% { box-shadow: 0 0 15px rgba(231, 76, 60, 0.8); }
+}
+
+@keyframes glow {
+    0% { box-shadow: 0 0 5px rgba(46, 204, 113, 0.3); }
+    50% { box-shadow: 0 0 20px rgba(46, 204, 113, 0.6), 0 0 30px rgba(0, 128, 255, 0.3); }
+    100% { box-shadow: 0 0 5px rgba(46, 204, 113, 0.3); }
+}
+
+nav li#disconnect1 i,
+nav li:last-child i {
+    color: rgba(255, 120, 120, 0.8);
+}
+
+nav li#disconnect1:hover i,
+nav li:last-child:hover i {
+    color: #e74c3c;
+    text-shadow: 0 0 12px rgba(231, 76, 60, 0.5);
+}
+
+/*-------------------------------------*\
+  SIDE MENU / OPTIONS BAR
+\*-------------------------------------*/
+
+menu.bar {
+    position: fixed;
+    top: 0;
+    left: 75px;
+    height: 100vh;
+    width: 200px;
+    background: linear-gradient(to bottom, rgba(50, 50, 50, 0.95), rgba(30, 30, 30, 0.95));
+    box-shadow: 3px 0 15px rgba(0, 0, 0, 0.3);
+    z-index: 5;
+    padding: 2rem 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    overflow-y: auto;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+menu.bar ul {
+    width: 100%;
+    padding: 0;
+}
+
+menu.bar li {
+    list-style: none;
+    padding: 0.8rem 1.5rem;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+menu.bar li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 0;
+    background: linear-gradient(to bottom, #2ecc71, #27ae60);
+    transition: height 0.3s ease;
+    border-radius: 0 3px 3px 0;
+}
+
+menu.bar li:hover::before {
+    height: 70%;
+}
+
+menu.bar li:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+menu.bar h4 {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+menu.bar h4:hover {
+    color: #2ecc71;
+    transform: translateX(5px);
+}
+
+/*-------------------------------------*\
+  MAIN CONTENT AREA
+\*-------------------------------------*/
+
+menu {
+    position: fixed;
+    top: 0;
+    left: 275px;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(40, 40, 40, 0.85), rgba(20, 20, 20, 0.85));
+    border-radius: 0;
+    z-index: 1;
+    padding: 2rem;
+    overflow-y: auto;
+}
+
+menu h2 {
+    color: #fff;
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 2rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    padding-bottom: 0.8rem;
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+menu h2::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(to right, #2ecc71, rgba(46, 204, 113, 0.5));
+    border-radius: 3px;
+}
+
+/*-------------------------------------*\
+  RAM SLIDER - ENHANCED
+\*-------------------------------------*/
+
+/* IMPROVED: Add ripple effect container */
+.ram-slider-container {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    padding: 1.8rem;
+    margin-bottom: 2rem;
+    box-shadow: inset 0 1px 5px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    position: relative;
+    overflow: hidden; /* Ensure ripple stays contained */
+}
+
+.ram-slider-container::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, rgba(46, 204, 113, 0.2), transparent, rgba(46, 204, 113, 0.2));
+    border-radius: 14px;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.ram-slider-container:hover::before {
+    opacity: 1;
+}
+
+/* NEW: Click ripple effect */
+.ram-slider-container::after {
+    content: '';
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, rgba(46, 204, 113, 0.7) 0%, rgba(46, 204, 113, 0) 70%);
+    border-radius: 50%;
+    opacity: 0;
+    transform: scale(0);
+    pointer-events: none;
+    z-index: 0;
+    transition: transform 0s;
+}
+
+.ram-slider-container.clicked::after {
+    opacity: 1;
+    transform: scale(6);
+    transition: transform 0.6s ease-out, opacity 0.8s ease-out;
+    animation: fadeOut 1s forwards;
+}
+
+@keyframes fadeOut {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+.ram-slider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.ram-slider-header h3 {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+}
+
+.ram-value {
+    background: linear-gradient(to right, #27ae60, #2ecc71);
+    color: white;
+    padding: 0.5rem 1.2rem;
+    border-radius: 20px;
+    font-size: 1rem;
+    font-weight: 600;
+    min-width: 90px;
+    text-align: center;
+    box-shadow: 0 3px 10px rgba(46, 204, 113, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.ram-value::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transform: rotate(45deg);
+    animation: ramValueShine 3s infinite;
+}
+
+/* NEW: Added value glow animation when slider clicked */
+.ram-slider-container.clicked .ram-value {
+    animation: valueGlow 0.8s;
+}
+
+@keyframes valueGlow {
+    0% { box-shadow: 0 3px 10px rgba(46, 204, 113, 0.3); }
+    50% { box-shadow: 0 5px 20px rgba(46, 204, 113, 0.8), 0 0 30px rgba(46, 204, 113, 0.4); }
+    100% { box-shadow: 0 3px 10px rgba(46, 204, 113, 0.3); }
+}
+
+@keyframes ramValueShine {
+    0% { transform: translateX(-100%) rotate(45deg); }
+    20%, 100% { transform: translateX(100%) rotate(45deg); }
+}
+
+/* IMPROVED RAM slider with better interactive feedback */
+.ram-slider-container input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    outline: none;
+    margin: 1.2rem 0;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+    position: relative;
+    cursor: pointer;
+    z-index: 1;
+}
+
+/* Interactive track styling */
+.ram-slider-container input[type="range"]::-webkit-slider-runnable-track {
+    height: 12px;
+    border-radius: 10px;
+    background: linear-gradient(to right, 
+        rgba(46, 204, 113, 0.7) 0%, 
+        rgba(46, 204, 113, 0.7) var(--progress-percent, 50%), 
+        rgba(0, 0, 0, 0.2) var(--progress-percent, 50%)
+    );
+    transition: background 0.3s ease, box-shadow 0.2s ease;
+}
+
+/* IMPROVED: Enhanced track with better click feedback */
+.ram-slider-container input[type="range"]:active::-webkit-slider-runnable-track {
+    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+.ram-slider-container input[type="range"]:focus::-webkit-slider-runnable-track {
+    background: linear-gradient(to right, 
+        rgba(46, 204, 113, 0.9) 0%, 
+        rgba(46, 204, 113, 0.9) var(--progress-percent, 50%), 
+        rgba(0, 0, 0, 0.3) var(--progress-percent, 50%)
+    );
+}
+
+/* Enhanced thumb styling */
+.ram-slider-container input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+    margin-top: -8px; /* Center thumb vertically */
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    z-index: 10;
+}
+
+/* IMPROVED: Dramatic active state with glow and pulse */
+.ram-slider-container input[type="range"]:active::-webkit-slider-thumb {
+    transform: scale(1.5);
+    background: linear-gradient(135deg, #33d67b, #2ecc71);
+    box-shadow: 0 0 25px rgba(46, 204, 113, 0.9), 0 0 10px rgba(255, 255, 255, 0.8);
+    animation: thumbPulse 0.8s infinite alternate;
+}
+
+@keyframes thumbPulse {
+    0% { box-shadow: 0 0 25px rgba(46, 204, 113, 0.9), 0 0 5px rgba(255, 255, 255, 0.6); }
+    100% { box-shadow: 0 0 35px rgba(46, 204, 113, 1), 0 0 15px rgba(255, 255, 255, 0.9); }
+}
+
+.ram-slider-container input[type="range"]:hover::-webkit-slider-thumb {
+    transform: scale(1.15);
+    box-shadow: 0 0 15px rgba(46, 204, 113, 0.6);
+}
+
+/* Firefox styles */
+.ram-slider-container input[type="range"]::-moz-range-track {
+    height: 12px;
+    border-radius: 10px;
+    background: linear-gradient(to right, 
+        rgba(46, 204, 113, 0.7) 0%, 
+        rgba(46, 204, 113, 0.7) var(--progress-percent, 50%), 
+        rgba(0, 0, 0, 0.2) var(--progress-percent, 50%)
+    );
+}
+
+.ram-slider-container input[type="range"]::-moz-range-thumb {
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* IMPROVED: Firefox active state */
+.ram-slider-container input[type="range"]:active::-moz-range-thumb {
+    transform: scale(1.5);
+    background: linear-gradient(135deg, #33d67b, #2ecc71);
+    box-shadow: 0 0 25px rgba(46, 204, 113, 0.9), 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+.ram-slider-container input[type="range"]:hover::-moz-range-thumb {
+    transform: scale(1.15);
+    box-shadow: 0 0 15px rgba(46, 204, 113, 0.6);
+}
+
+/* Min/max indicators */
+.ram-min-max {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.ram-min-max span {
+    position: relative;
+}
+
+.ram-min-max span::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: rgba(46, 204, 113, 0.3);
+    border-radius: 2px;
+}
+
+/*-------------------------------------*\
+  FORM CONTROLS
+\*-------------------------------------*/
+
+label.divers {
+    display: inline-block;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+    margin: 0.5rem 0;
+    padding: 0.5rem 0;
+    min-width: 200px;
+}
+
+select {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+    color: #fff;
+    padding: 0.6rem 1rem;
+    margin: 0.5rem 0;
+    margin-right: 1.5rem;
+    font-size: 0.95rem;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='white' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: calc(100% - 10px) center;
+    padding-right: 30px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+select:focus, select:hover {
+    outline: none;
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: #2ecc71;
+    box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.2);
+}
+
+select option {
+    background-color: #333;
+    color: #fff;
+}
+
+input.option-launcher {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 50px;
+    height: 25px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 15px;
+    position: relative;
+    margin-left: 1rem;
+    cursor: pointer;
+    vertical-align: middle;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+input.option-launcher:checked {
+    background: linear-gradient(to right, #27ae60, #2ecc71);
+    border-color: #2ecc71;
+}
+
+input.option-launcher::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 3px;
+    width: 19px;
+    height: 19px;
+    background-color: #fff;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+input.option-launcher:checked::after {
+    left: calc(100% - 22px);
+}
+
+/*-------------------------------------*\
+  SETTINGS SECTIONS
+\*-------------------------------------*/
+
+.SettingsModsAddionnel, 
+.SettingsSrcPack, 
+.SettingsShaders {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: inset 0 1px 5px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.SettingsModsAddionnel {
+    max-height: 480px;
+    overflow-y: auto;
+}
+
+/* IMPROVED checkbox position to LEFT with better styling */
+.SettingsModsAddionnel label {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    justify-content: flex-start;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.95rem;
+    margin: 0.8rem 0;
+    padding: 0.6rem 0.8rem;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.SettingsModsAddionnel label:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateX(3px);
+}
+
+/* IMPROVED: Forced checkbox position with enhanced specificity */
+.SettingsModsAddionnel input[type="checkbox"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    margin-right: 15px;
+    margin-left: 0;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+    flex-grow: 0;
+    order: -1 !important; /* Always first */
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+/* IMPROVED: Improved checkbox spacing and alignment */
+.SettingsModsAddionnel span, 
+.SettingsModsAddionnel div {
+    margin-left: 5px;
+    order: 0;
+}
+
+.SettingsModsAddionnel input:hover {
+    border-color: rgba(46, 204, 113, 0.5);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.SettingsModsAddionnel input:checked {
+    background: linear-gradient(135deg, #27ae60, #2ecc71);
+    border-color: #2ecc71;
+    box-shadow: 0 0 10px rgba(46, 204, 113, 0.3);
+}
+
+.SettingsModsAddionnel input:checked::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 7px;
+    width: 6px;
+    height: 12px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* Enhanced hover effect for mod options */
+.SettingsModsAddionnel label::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, transparent, rgba(46, 204, 113, 0.1), transparent);
+    transition: all 0.5s ease;
+}
+
+.SettingsModsAddionnel label:hover::before {
+    left: 100%;
+}
+
+.SettingsSrcPack label,
+.SettingsShaders label {
+    display: block;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.95rem;
+    margin: 0.8rem 0;
+    padding: 0.7rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.SettingsSrcPack label:hover,
+.SettingsShaders label:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(3px);
+}
+
+/*-------------------------------------*\
+  BUTTONS
+\*-------------------------------------*/
+
+#copyFileButton, #copyFileButton1 {
+    background: linear-gradient(to right, #27ae60, #2ecc71);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+#copyFileButton:hover, #copyFileButton1:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(46, 204, 113, 0.4);
+    background: linear-gradient(to right, #2ecc71, #33d67b);
+}
+
+#copyFileButton:active, #copyFileButton1:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(46, 204, 113, 0.4);
+}
+
+/*-------------------------------------*\
+  PROFILE ACCOUNT
+\*-------------------------------------*/
+
+.ProfilAccount .box-card {
+    background: linear-gradient(135deg, rgba(30, 60, 30, 0.8), rgba(20, 40, 20, 0.8));
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(46, 204, 113, 0.1);
+    position: relative;
+    width: 400px;
+    transition: all 0.3s ease;
+}
+
+.ProfilAccount .box-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+    border-color: rgba(46, 204, 113, 0.2);
+}
+
+.ProfilAccount p {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+    margin: 0.5rem 0;
+    padding-left: 1rem;
+    position: relative;
+}
+
+.ProfilAccount p::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: #2ecc71;
+}
+
+.ProfilAccount img#head {
+    position: absolute;
+    top: -30px;
+    right: 20px;
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    border: 2px solid rgba(46, 204, 113, 0.5);
+    transition: all 0.3s ease;
+}
+
+.ProfilAccount img#head:hover {
+    transform: scale(1.05);
+}
+
+/*-------------------------------------*\
+  CUSTOM SCROLLBARS
+\*-------------------------------------*/
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, #2ecc71, #27ae60);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, #33d67b, #2ecc71);
+}
