@@ -1,3 +1,13 @@
+name: Build Application
+
+on:
+  push:
+    branches: [ main, master ]
+    tags: [ 'v*' ]  # Se déclenche sur les tags commençant par v (ex: v1.0.0)
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:  # Permet de déclencher manuellement
+
 jobs:
   build:
     strategy:
