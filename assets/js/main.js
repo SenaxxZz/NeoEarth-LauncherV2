@@ -4,7 +4,6 @@ const fs = require("fs");
 require('dotenv').config();
 const { xml2json } = require("xml-js");
 const { formToJSON } = require("axios");
-const Store = require("electron-store");
 
 const store = new Store();
 const dataPath = path.join(app.getPath('userData'), ".neoearth-mc");
