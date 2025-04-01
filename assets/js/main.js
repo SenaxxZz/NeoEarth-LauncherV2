@@ -6,8 +6,9 @@ require('dotenv').config();
 const { xml2json } = require("xml-js");
 const { formToJSON } = require("axios");
 const { app } = require("electron");
-const os = require("os");
+const Store = require("electron-store");
 
+const store = new Store();
 const dataPath = path.join(app.getPath('userData'), ".neoearth-mc");
 let modsList = [];
 fs.readdir(path.join(dataPath, "mods"), (err, modList) => {
@@ -66,22 +67,22 @@ if (avatarElement) {
                 const fallbackResponse = await axios.get("https://www.neoearth-mc.fr/api/rss");
                 const json = xml2json(fallbackResponse.data);
                 for (i = 6; i < JSON.parse(json).elements[0].elements[0].elements.length && i < 8; i++) {
-                  let date = JSON.parse(json).elements[0].elements[0].elements[i].elements[4].elements[0]?.text;
-                  if (date) {
-                    let dateObj = new Date(date);
-                    let day = String(dateObj.getUTCDate()).padStart(2, '0');
-                    let month = String(dateObj.getUTCMonth() + 1).padStart(2, '0'); 
-                    let year = dateObj.getUTCFullYear();
-                    let hours = String(dateObj.getUTCHours()).padStart(2, '0');
-                    let minutes = String(dateObj.getUTCMinutes()).padStart(2, '0');
+                    let date = JSON.parse(json).elements[0].elements[0].elements[i].elements[4].elements[0]?.text;
+                    if (date) {
+                        let dateObj = new Date(date);
+                        let day = String(dateObj.getUTCDate()).padStart(2, '0');
+                        let month = String(dateObj.getUTCMonth() + 1).padStart(2, '0'); 
+                        let year = dateObj.getUTCFullYear();
+                        let hours = String(dateObj.getUTCHours()).padStart(2, '0');
+                        let minutes = String(dateObj.getUTCMinutes()).padStart(2, '0');
 
-                    let formattedDate = `${day}/${month}/${year} ${hours}:${minutes}`;
+                        let formattedDate = `${day}/${month}/${year} ${hours}:${minutes}`;
 
-                    let image = JSON.parse(json).elements[0].elements[0].elements[i].elements[5].attributes?.url;
-                    let title = JSON.parse(json).elements[0].elements[0].elements[i].elements[0].elements[0]?.text;
-                    let author = JSON.parse(json).elements[0].elements[0].elements[i].elements[7].elements[0]?.text;
-                    data.push({title: title, image: image, author: author, publishedAt: formattedDate, tags: "Nouveauté"})
-                }
+                        let image = JSON.parse(json).elements[0].elements[0].elements[i].elements[5].attributes?.url;
+                        let title = JSON.parse(json).elements[0].elements[0].elements[i].elements[0].elements[0]?.text;
+                        let author = JSON.parse(json).elements[0].elements[0].elements[i].elements[7].elements[0]?.text;
+                        data.push({title: title, image: image, author: author, publishedAt: formattedDate, tags: "Nouveauté"});
+                    }
                 }
             } catch (fallbackError) {
                 return;
@@ -142,52 +143,51 @@ if (avatarElement) {
 
 document.getElementById("cards-container")?.addEventListener("click", (event) => {
     shell.openExternal("https://www.neoearth-mc.fr");
-})
-
+});
 
 document.getElementById("link-discord")?.addEventListener("click", (event) => {
-    shell.openExternal("https://discord.gg/NRrwNm39G8")
-})
+    shell.openExternal("https://discord.gg/NRrwNm39G8");
+});
 
 document.getElementById("link-twitter")?.addEventListener("click", (event) => {
-    shell.openExternal("https://twitter.com/NeoEarth_Off")
-})
+    shell.openExternal("https://twitter.com/NeoEarth_Off");
+});
 
 document.getElementById("link-tiktok")?.addEventListener("click", (event) => {
-    shell.openExternal("https://www.tiktok.com/@neoearth_off")
-})
+    shell.openExternal("https://www.tiktok.com/@neoearth_off");
+});
 
 document.getElementById("link-youtube")?.addEventListener("click", (event) => {
-    shell.openExternal("https://www.youtube.com/@neoearth_off")
-})
+    shell.openExternal("https://www.youtube.com/@neoearth_off");
+});
 
 document.getElementById("link-twitch")?.addEventListener("click", (event) => {
-    shell.openExternal("https://www.twitch.tv/neoearth_off")
-})
+    shell.openExternal("https://www.twitch.tv/neoearth_off");
+});
 
 document.getElementById("rules").addEventListener("click", (event) => {
-    shell.openExternal("https://wikimc.neoearth-mc.fr")
-})
+    shell.openExternal("https://wikimc.neoearth-mc.fr");
+});
 
 document.getElementById("radio").addEventListener("click", (event) => {
-    shell.openExternal("https://radio.neoearth-mc.fr")
-})
+    shell.openExternal("https://radio.neoearth-mc.fr");
+});
 
 document.getElementById("close")?.addEventListener("click", () => {
     ipcRenderer.send("quit");
-})
+});
 
 document.getElementById("minimize")?.addEventListener("click", () => {
     ipcRenderer.send("minimize");
-})
+});
 
 document.getElementById("maximize")?.addEventListener("click", () => {
     ipcRenderer.send("maximize");
-})
+});
 
 document.getElementById("close-error")?.addEventListener("click", () => {
     document.getElementById("LogConsole").style = "display: none;";
-})
+});
 
 // === GESTION DU MENU SOCIAL - VERSION SIMPLIFIÉE ===
 // On utilise un gestionnaire global pour le menu
@@ -308,7 +308,7 @@ document.getElementById("launch")?.addEventListener("click", async () => {
             console.log(e);
             ipcRenderer.send("log", "Erreur de téléchargement pour : " + path);
             console.log("Erreur de téléchargement pour : " + path);
-            console.log(path)
+            console.log(path);
             temp = false;
         }
     }
@@ -378,6 +378,6 @@ document.getElementById("launch")?.addEventListener("click", async () => {
                     ipcRenderer.send("quit");
                 } 
             }, 20000);
-        })
+        });
     }
 });
