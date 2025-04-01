@@ -2,7 +2,7 @@
   "name": "NeoEarth-MC",
   "version": "1.0.3",
   "publicVersion": "1.0.3",
-  "description": "Launcher officiel",
+  "description": "Official Launcher",
   "main": "Main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -35,13 +35,13 @@
       "icon": "./assets/icon/logo.png",
       "publisherName": "NeoEarth-MC",
       "target": "nsis",
-      "arch": ["x64", "arm64"] 
+      "arch": ["x64"]
     },
     "mac": {
       "icon": "./assets/icon/logo.png",
       "target": ["dmg", "zip"],
       "category": "public.app-category.games",
-      "arch": ["x64", "arm64"]
+      "arch": ["x64"]
     },
     "nsis": {
       "oneClick": false,
