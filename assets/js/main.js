@@ -4,7 +4,6 @@ const fs = require("fs");
 require('dotenv').config();
 const { xml2json } = require("xml-js");
 const { formToJSON } = require("axios");
-const { app } = require("electron");
 const Store = require("electron-store");
 
 const store = new Store();
