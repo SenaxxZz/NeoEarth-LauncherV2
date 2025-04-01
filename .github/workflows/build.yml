@@ -31,10 +31,18 @@ jobs:
       - name: Build Windows (NSIS)
         if: runner.os == 'Windows'
         run: npm run win
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Ajouter cette option pour ne pas publier automatiquement
+          CSC_IDENTITY_AUTO_DISCOVERY: false
 
       - name: Build macOS (DMG + ZIP)
         if: runner.os == 'macOS'
         run: npm run mac
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Ajouter cette option pour ne pas publier automatiquement
+          CSC_IDENTITY_AUTO_DISCOVERY: false
 
       - name: Upload build artifacts (Windows)
         if: runner.os == 'Windows'
@@ -48,4 +56,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: NeoEarth-Mac
-          path: dist/*.dmg
+          path: |
+            dist/*.dmg
+            dist/*.zip
