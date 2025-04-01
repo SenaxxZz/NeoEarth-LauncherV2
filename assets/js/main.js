@@ -1,9 +1,14 @@
 const { Client, Authenticator } = require("minecraft-launcher-core");
 const launcher = new Client();
 const fs = require("fs");
+const path = require("path");
 require('dotenv').config();
 const { xml2json } = require("xml-js");
 const { formToJSON } = require("axios");
+const { app } = require("electron");
+const os = require("os");
+
+const dataPath = path.join(app.getPath('userData'), ".neoearth-mc");
 let modsList = [];
 fs.readdir(path.join(dataPath, "mods"), (err, modList) => {
     if (err) return;
@@ -15,9 +20,9 @@ fs.readdir(path.join(dataPath, "mods"), (err, modList) => {
         if (existingIndex !== -1) {
             let filePath = `${modsList[existingIndex]}`;
             modsList.splice(existingIndex, 1);
-            fs.unlinkSync(path.join(dataPath, "mods", filePath)), (err) => {
+            fs.unlinkSync(path.join(dataPath, "mods", filePath), (err) => {
                 if (err) return console.error(`Erreur lors de la suppression de ${modsList[existingIndex]} :`, err);
-            };
+            });
             console.info(`Suppression de la version précédente du mod : ${modsList[existingIndex]}`);
         }
         modsList.push(modName);
@@ -69,9 +74,9 @@ if (avatarElement) {
                     let year = dateObj.getUTCFullYear();
                     let hours = String(dateObj.getUTCHours()).padStart(2, '0');
                     let minutes = String(dateObj.getUTCMinutes()).padStart(2, '0');
-                
+
                     let formattedDate = `${day}/${month}/${year} ${hours}:${minutes}`;
-                    
+
                     let image = JSON.parse(json).elements[0].elements[0].elements[i].elements[5].attributes?.url;
                     let title = JSON.parse(json).elements[0].elements[0].elements[i].elements[0].elements[0]?.text;
                     let author = JSON.parse(json).elements[0].elements[0].elements[i].elements[7].elements[0]?.text;
@@ -86,45 +91,45 @@ if (avatarElement) {
         data.forEach(newsItem => {
             const card = document.createElement("div");
             card.className = "card-news";
-        
+
             const title = document.createElement("h1");
             title.textContent = newsItem.title;
-        
+
             const img = document.createElement("img");
             img.className = "news";
             img.src = !newsItem.image.includes("https") ? `https://www.neoearth-mc.fr/storage/news/${newsItem.image}` : newsItem.image;
-        
+
             const tag = document.createElement("h3");
             tag.innerText = newsItem.tags;
-            
+
             // Nouvelle structure pour la section auteur
             const authorSection = document.createElement("div");
             authorSection.className = "author-section";
-            
+
             const avatar = document.createElement("img");
             avatar.className = "avatar-author";
             avatar.src = `https://www.neoearth-mc.fr/api/skin-api/avatars/face/${newsItem.author}.png`;
             avatar.onerror = () => {
                 avatar.src = `https://www.neoearth-mc.fr/api/skin-api/avatars/face/${username}.png`;
             };
-            
+
             const authorInfo = document.createElement("div");
             authorInfo.className = "author-info";
-            
+
             const author = document.createElement("p");
             author.className = "author-news";
             author.innerText = newsItem.author;
-            
+
             const date = document.createElement("p");
             date.className = "date-news";
             date.innerText = newsItem.publishedAt;
-            
+
             // Structure de la carte
             divNews.appendChild(card);
             card.appendChild(img);
             card.appendChild(title);
             card.appendChild(tag);
-            
+
             // Ajout de la section auteur
             authorInfo.appendChild(author);
             authorInfo.appendChild(date);
@@ -190,13 +195,13 @@ const socialMenuManager = (function() {
     const menuBtn = document.getElementById("menuBtn");
     const menu = document.getElementById("menu");
     if (!menuBtn || !menu) return;
-    
+
     // Délai plus long pour éviter les fermetures accidentelles
     let menuDelay = 150;
     let menuTimeout = null;
     let isMouseOverMenu = false;
     let isMouseOverButton = false;
-    
+
     // Fonctions de gestion
     function showMenu() {
         clearTimeout(menuTimeout);
@@ -205,7 +210,7 @@ const socialMenuManager = (function() {
         menu.style.visibility = "visible";
         menu.style.pointerEvents = "all";
     }
-    
+
     function scheduleHideMenu() {
         // Ne fermer que si la souris n'est ni sur le bouton ni sur le menu
         if (!isMouseOverButton && !isMouseOverMenu) {
@@ -217,34 +222,34 @@ const socialMenuManager = (function() {
             }, menuDelay);
         }
     }
-    
+
     // Événements pour le bouton
     menuBtn.addEventListener("mouseenter", () => {
         isMouseOverButton = true;
         showMenu();
     });
-    
+
     menuBtn.addEventListener("mouseleave", () => {
         isMouseOverButton = false;
         scheduleHideMenu();
     });
-    
+
     // Événements pour le menu
     menu.addEventListener("mouseenter", () => {
         isMouseOverMenu = true;
         showMenu();
     });
-    
+
     menu.addEventListener("mouseleave", () => {
         isMouseOverMenu = false;
         scheduleHideMenu();
     });
-    
+
     // Empêcher que le menu se ferme lors d'un clic sur un élément du menu
     menu.addEventListener("click", (e) => {
         e.stopPropagation();
     });
-    
+
     return {
         showMenu,
         hideMenu: scheduleHideMenu
@@ -263,7 +268,7 @@ document.getElementById("launch")?.addEventListener("click", async () => {
 
         const element = files[filesInstalled];
         try {
-            const sha = require("crypto").createHash("sha1").update(fs.readFileSync(path.join(path.join(os.homedir(), "AppData", "Roaming", ".neoearth-mc"), element.path.replace("/files/", "")))).digest("hex");
+            const sha = require("crypto").createHash("sha1").update(fs.readFileSync(path.join(dataPath, element.path.replace("/files/", "")))).digest("hex");
             if (sha == element.sha1) {
                 console.log("Fichier déjà téléchargé :", element.name);
                 logMessage.innerText = `Le fichier ${element.name} est déjà téléchargé.`;
@@ -282,7 +287,7 @@ document.getElementById("launch")?.addEventListener("click", async () => {
         const logMessage = document.createElement("p");
         const downloadFile = new Downloader({
             url: file.url,
-            directory: path.join(path.join(os.homedir(), "AppData", "Roaming", ".neoearth-mc"), file.path.replace("files", ""), "../"),
+            directory: path.join(dataPath, file.path.replace("files", ""), "../"),
             fileName: file.name,
             cloneFiles: false,
             onProgress: function (percentage) {
@@ -317,15 +322,15 @@ document.getElementById("launch")?.addEventListener("click", async () => {
         logConsole.appendChild(logMessage);
         let opts = {
             authorization: Authenticator.getAuth(store.get("username")),
-            root: path.join(os.homedir(), "AppData/Roaming/.neoearth-mc"),
+            root: path.join(dataPath),
             verify: true,
             timeout: 10000,
             version: {
                 number: "1.7.10",
                 type: "release"
             },
-            forge: path.join(os.homedir(), "AppData/Roaming/.neoearth-mc/forge.jar"),
-            javaPath: path.join(os.homedir(), "AppData/Roaming/.neoearth-mc/jre1.8.0_381/bin/javaw.exe"),
+            forge: path.join(dataPath, "forge.jar"),
+            javaPath: path.join(dataPath, "jre1.8.0_381/bin/java"),
             memory: {
                 min: store.get('ramSettings').ramMin,
                 max: store.get('ramSettings').ramMax
@@ -335,7 +340,7 @@ document.getElementById("launch")?.addEventListener("click", async () => {
                 identifier: "88.151.197.30:25565",
                 legacy: null,
             }
-        }
+        };
 
         launcher.launch(opts);
         launcher.on('debug', (e) => {
@@ -375,4 +380,4 @@ document.getElementById("launch")?.addEventListener("click", async () => {
             }, 20000);
         })
     }
-})
+});
