@@ -8,7 +8,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
     "build:win": "electron-builder --windows --config",
-    "build:mac": "electron-builder --mac --config"
+    "build:mac": "electron-builder --mac --config",
+    "build:mac-x64": "electron-builder --mac --x64 --config"
   },
   "keywords": [],
   "author": "NeoEarth-MC",
