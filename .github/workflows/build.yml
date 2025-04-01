@@ -2,7 +2,7 @@ name: Build Multi-Arch
 
 on:
   push:
-    tags: [ 'v*.*.*' ]  # Déclenché uniquement sur les tags sémantiques (ex: v1.0.0)
+    tags: [ 'v*.*.*' ]
   workflow_dispatch:
 
 jobs:
@@ -13,7 +13,7 @@ jobs:
         arch: [x64, arm64]
         exclude:
           - os: windows-latest
-            arch: arm64  # Windows ARM64 nécessite des outils spécifiques (optionnel)
+            arch: arm64 
     runs-on: ${{ matrix.os }}
 
     steps:
