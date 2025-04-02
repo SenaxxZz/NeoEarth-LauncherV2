@@ -312,6 +312,7 @@ document.getElementById("launch")?.addEventListener("click", async () => {
             temp = false;
         }
     }
+    
     if (filesInstalled == totalFiles) {
         const logMessage = document.createElement("p");
         console.log("Téléchargement des assets terminé.");
@@ -323,20 +324,16 @@ document.getElementById("launch")?.addEventListener("click", async () => {
 
         // Chemin Java adapté à la plateforme
         const javaPath = process.platform === 'darwin' 
-            ? path.join(dataPath, "jre1.8.0_381/Contents/Home/bin/java") // Chemin pour macOS
-            : path.join(dataPath, "jre1.8.0_381/bin/java"); // Chemin pour Windows
+            ? path.join(dataPath, "jre1.8.0_381/Contents/Home/bin/java") 
+            : path.join(dataPath, "jre1.8.0_381/bin/java");
 
-        // Set permissions to allow execution
-        exec(`chmod +x ${javaPath}`, (error, stdout, stderr) => {
-            if (error) {
-                console.error(`Erreur lors de la modification des permissions: ${error.message}`);
-                return;
-            }
-            if (stderr) {
-                console.error(`Erreur: ${stderr}`);
-                return;
-            }
-            console.log(`Permissions modifiées: ${stdout}`);
+        const setupLaunch = () => {
+            // Arguments JVM spécifiques à macOS pour résoudre le problème de thread
+            const macOsJvmArgs = process.platform === 'darwin' ? [
+                "-XstartOnFirstThread",
+                "-Djava.awt.headless=false", 
+                "-Dorg.lwjgl.opengl.Display.allowSoftwareOpenGL=true"
+            ] : [];
 
             let opts = {
                 authorization: Authenticator.getAuth(store.get("username")),
@@ -353,6 +350,8 @@ document.getElementById("launch")?.addEventListener("click", async () => {
                     min: store.get('ramSettings').ramMin,
                     max: store.get('ramSettings').ramMax
                 },
+                // Ajout des arguments JVM spécifiques à macOS
+                javaArgs: macOsJvmArgs,
                 quickPlay: {
                     type: "legacy",
                     identifier: "88.151.197.30:25565",
@@ -361,6 +360,7 @@ document.getElementById("launch")?.addEventListener("click", async () => {
             };
 
             launcher.launch(opts);
+            
             launcher.on('debug', (e) => {
                 ipcRenderer.send("log", e);
                 const logMessage = document.createElement("p");
@@ -376,6 +376,7 @@ document.getElementById("launch")?.addEventListener("click", async () => {
                 const logConsole = document.getElementById("eventLog");
                 logConsole.appendChild(logMessage);
             });
+            
             launcher.on('data', (e) => {
                 ipcRenderer.send("log", e);
                 const logMessage = document.createElement("p");
@@ -390,13 +391,31 @@ document.getElementById("launch")?.addEventListener("click", async () => {
 
                 const logConsole = document.getElementById("eventLog");
                 logConsole.appendChild(logMessage);
-
-                setTimeout(() => {
-                    if (store.get("KeepLauncherOpen") == false || store.get("KeepLauncherOpen") == null) {
-                        ipcRenderer.send("quit");
-                    } 
-                }, 20000);
             });
-        });
+            
+            launcher.on('close', () => {
+                if (store.get("KeepLauncherOpen") == false || store.get("KeepLauncherOpen") == null) {
+                    setTimeout(() => {
+                        ipcRenderer.send("quit");
+                    }, 5000);
+                }
+            });
+        };
+
+        // Exécuter chmod uniquement sur macOS
+        if (process.platform === 'darwin') {
+            exec(`chmod +x "${javaPath}"`, (error) => {
+                if (error) {
+                    console.error(`Erreur lors de la modification des permissions: ${error.message}`);
+                    // Continuer malgré l'erreur
+                }
+                setupLaunch();
+            });
+        } else {
+            // Sur Windows, lancer directement
+            setupLaunch();
+        }
     }
 });
+
+// ...rest of code unchanged...
