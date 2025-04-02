@@ -313,165 +313,108 @@ document.getElementById("launch")?.addEventListener("click", async () => {
         }
     }
     
-    if (filesInstalled == totalFiles) {
-        const logMessage = document.createElement("p");
-        console.log("Téléchargement des assets terminé.");
-        ipcRenderer.send("log", "Téléchargement des assets terminé.");
-        logMessage.innerText = `Téléchargement des assets terminé.`;
+    // Remplacer toute la section dans la condition if (filesInstalled == totalFiles)
+
+if (filesInstalled == totalFiles) {
+    const logMessage = document.createElement("p");
+    console.log("Téléchargement des assets terminé.");
+    ipcRenderer.send("log", "Téléchargement des assets terminé.");
+    logMessage.innerText = `Téléchargement des assets terminé.`;
+
+    const logConsole = document.getElementById("eventLog");
+    logConsole.appendChild(logMessage);
+
+    // Chemin Java adapté à la plateforme
+    const javaPath = process.platform === 'darwin' 
+        ? path.join(dataPath, "jre1.8.0_381/Contents/Home/bin/java") 
+        : path.join(dataPath, "jre1.8.0_381/bin/java");
+
+    // Sur macOS, s'assurer que le fichier java est exécutable
+    if (process.platform === 'darwin') {
+        try {
+            fs.chmodSync(javaPath, '755');
+        } catch (error) {
+            console.error(`Erreur lors de la modification des permissions: ${error.message}`);
+        }
+    }
+
+    // Configuration spéciale pour macOS
+    const macOsArgs = process.platform === 'darwin' ? [
+        "-XstartOnFirstThread",
+        "-Djava.awt.headless=false",
+        "-Dapple.awt.application.name=Minecraft",
+        "-Dapple.awt.graphics.UseQuartz=true",
+        "-Dorg.lwjgl.opengl.Display.allowSoftwareOpenGL=true",
+        "-Dlwjgl.osxthreads=true",
+        "-Dapple.awt.UIElement=true"
+    ] : [];
+
+    // Utiliser minecraft-launcher-core pour les deux plateformes
+    let opts = {
+        authorization: Authenticator.getAuth(store.get("username")),
+        root: path.join(dataPath),
+        verify: true,
+        timeout: 10000,
+        version: {
+            number: "1.7.10",
+            type: "release"
+        },
+        forge: path.join(dataPath, "forge.jar"),
+        javaPath: javaPath,
+        memory: {
+            min: store.get('ramSettings').ramMin,
+            max: store.get('ramSettings').ramMax
+        },
+        javaArgs: macOsArgs, // Arguments JVM spécifiques à macOS
+        quickPlay: {
+            type: "legacy",
+            identifier: "88.151.197.30:25565",
+            legacy: null,
+        }
+    };
+
+    // Lancer le jeu avec les options configurées
+    launcher.launch(opts);
     
+    // Gérer les événements du launcher
+    launcher.on('debug', (e) => {
+        ipcRenderer.send("log", e);
+        const logMessage = document.createElement("p");
+        if (e.includes("/ERROR")) {
+            logMessage.style.color = "red";
+        } else if (e.includes("/WARN")) {
+            logMessage.style.color = "orange";
+        } else {
+            logMessage.style.color = "white";
+        }
+        logMessage.innerText = e;
+
         const logConsole = document.getElementById("eventLog");
         logConsole.appendChild(logMessage);
+    });
     
-        // Chemin Java adapté à la plateforme
-        const javaPath = process.platform === 'darwin' 
-            ? path.join(dataPath, "jre1.8.0_381/Contents/Home/bin/java") 
-            : path.join(dataPath, "jre1.8.0_381/bin/java");
-    
-        // Fonction de lancement différente selon la plateforme
-        if (process.platform === 'darwin') {
-            // Sur macOS, utiliser une approche différente avec script wrapper
-            exec(`chmod +x "${javaPath}"`, (error) => {
-                if (error) {
-                    console.error(`Erreur lors de la modification des permissions: ${error.message}`);
-                }
-                
-                // Créer un script shell temporaire pour lancer Minecraft avec les bons arguments
-                const scriptPath = path.join(dataPath, "launch-minecraft.sh");
-                const scriptContent = `#!/bin/bash
-    export JAVA_HOME="${path.join(dataPath, "jre1.8.0_381/Contents/Home")}"
-    cd "${path.join(dataPath)}"
-    
-    "${javaPath}" -XstartOnFirstThread \\
-    -Xms${store.get('ramSettings').ramMin}M \\
-    -Xmx${store.get('ramSettings').ramMax}M \\
-    -Djava.library.path="${path.join(dataPath, "natives")}" \\
-    -Dorg.lwjgl.opengl.Display.allowSoftwareOpenGL=true \\
-    -Djna.nosys=true \\
-    -Dorg.lwjgl.opengl.Display.enableHighDPI=true \\
-    -Dapple.awt.application.name=Minecraft \\
-    -Djava.awt.headless=false \\
-    -Dapple.awt.graphics.UseQuartz=true \\
-    -cp "${path.join(dataPath, "libraries/*")}:${path.join(dataPath, "forge.jar")}" \\
-    net.minecraft.launchwrapper.Launch \\
-    --username ${store.get("username")} \\
-    --version 1.7.10 \\
-    --gameDir "${path.join(dataPath)}" \\
-    --assetsDir "${path.join(dataPath, "assets")}" \\
-    --assetIndex 1.7.10 \\
-    --uuid ${require('crypto').randomBytes(16).toString('hex')} \\
-    --accessToken ${require('crypto').randomBytes(32).toString('hex')} \\
-    --userType mojang \\
-    --tweakClass cpw.mods.fml.common.launcher.FMLTweaker \\
-    --server 88.151.197.30 --port 25565
-    `;
-                
-                fs.writeFileSync(scriptPath, scriptContent);
-                exec(`chmod +x "${scriptPath}"`, (error) => {
-                    if (error) {
-                        console.error(`Erreur permissions script: ${error.message}`);
-                    }
-                    
-                    // Lancer le script
-                    const proc = exec(`"${scriptPath}"`, (error, stdout, stderr) => {
-                        if (error) {
-                            console.error(`Erreur exécution: ${error.message}`);
-                        }
-                    });
-                    
-                    proc.stdout.on('data', (data) => {
-                        const logMessage = document.createElement("p");
-                        logMessage.innerText = data;
-                        const logConsole = document.getElementById("eventLog");
-                        logConsole.appendChild(logMessage);
-                    });
-                    
-                    proc.stderr.on('data', (data) => {
-                        const logMessage = document.createElement("p");
-                        logMessage.style.color = "red";
-                        logMessage.innerText = data;
-                        const logConsole = document.getElementById("eventLog");
-                        logConsole.appendChild(logMessage);
-                    });
-                    
-                    proc.on('close', (code) => {
-                        if (store.get("KeepLauncherOpen") == false || store.get("KeepLauncherOpen") == null) {
-                            setTimeout(() => {
-                                ipcRenderer.send("quit");
-                            }, 5000);
-                        }
-                    });
-                });
-            });
+    launcher.on('data', (e) => {
+        ipcRenderer.send("log", e);
+        const logMessage = document.createElement("p");
+        if (e.includes("/ERROR")) {
+            logMessage.style.color = "red";
+        } else if (e.includes("/WARN")) {
+            logMessage.style.color = "orange";
         } else {
-            // Sur Windows, continuer à utiliser minecraft-launcher-core
-            const setupLaunch = () => {
-                let opts = {
-                    authorization: Authenticator.getAuth(store.get("username")),
-                    root: path.join(dataPath),
-                    verify: true,
-                    timeout: 10000,
-                    version: {
-                        number: "1.7.10",
-                        type: "release"
-                    },
-                    forge: path.join(dataPath, "forge.jar"),
-                    javaPath: javaPath,
-                    memory: {
-                        min: store.get('ramSettings').ramMin,
-                        max: store.get('ramSettings').ramMax
-                    },
-                    quickPlay: {
-                        type: "legacy",
-                        identifier: "88.151.197.30:25565",
-                        legacy: null,
-                    }
-                };
-    
-                launcher.launch(opts);
-                
-                launcher.on('debug', (e) => {
-                    ipcRenderer.send("log", e);
-                    const logMessage = document.createElement("p");
-                    if (e.includes("/ERROR")) {
-                        logMessage.style.color = "red";
-                    } else if (e.includes("/WARN")) {
-                        logMessage.style.color = "orange";
-                    } else {
-                        logMessage.style.color = "white";
-                    }
-                    logMessage.innerText = e;
-    
-                    const logConsole = document.getElementById("eventLog");
-                    logConsole.appendChild(logMessage);
-                });
-                
-                launcher.on('data', (e) => {
-                    ipcRenderer.send("log", e);
-                    const logMessage = document.createElement("p");
-                    if (e.includes("/ERROR")) {
-                        logMessage.style.color = "red";
-                    } else if (e.includes("/WARN")) {
-                        logMessage.style.color = "orange";
-                    } else {
-                        logMessage.style.color = "white";
-                    }
-                    logMessage.innerText = e;
-    
-                    const logConsole = document.getElementById("eventLog");
-                    logConsole.appendChild(logMessage);
-                });
-                
-                launcher.on('close', () => {
-                    if (store.get("KeepLauncherOpen") == false || store.get("KeepLauncherOpen") == null) {
-                        setTimeout(() => {
-                            ipcRenderer.send("quit");
-                        }, 5000);
-                    }
-                });
-            };
-            
-            // Sur Windows, lancer directement
-            setupLaunch();
+            logMessage.style.color = "white";
         }
+        logMessage.innerText = e;
+
+        const logConsole = document.getElementById("eventLog");
+        logConsole.appendChild(logMessage);
+    });
+    
+    launcher.on('close', () => {
+        if (store.get("KeepLauncherOpen") == false || store.get("KeepLauncherOpen") == null) {
+            setTimeout(() => {
+                ipcRenderer.send("quit");
+            }, 5000);
+        }
+    });
     }
 })
