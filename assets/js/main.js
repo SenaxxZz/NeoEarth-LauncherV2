@@ -327,37 +327,42 @@ document.getElementById("launch")?.addEventListener("click", async () => {
             ? path.join(dataPath, "jre1.8.0_381/Contents/Home/bin/java") 
             : path.join(dataPath, "jre1.8.0_381/bin/java");
 
-        const setupLaunch = () => {
-            // Arguments JVM spécifiques à macOS pour résoudre le problème de thread
-            const macOsJvmArgs = process.platform === 'darwin' ? [
-                "-XstartOnFirstThread",
-                "-Djava.awt.headless=false", 
-                "-Dorg.lwjgl.opengl.Display.allowSoftwareOpenGL=true"
-            ] : [];
+            const setupLaunch = () => {
+                // Arguments JVM améliorés pour macOS pour résoudre les problèmes de thread
+                const macOsJvmArgs = process.platform === 'darwin' ? [
+                    "-XstartOnFirstThread",
+                    "-Djava.awt.headless=false", 
+                    "-Dorg.lwjgl.opengl.Display.allowSoftwareOpenGL=true",
+                    "-Dapple.awt.application.name=Minecraft",
+                    "-Djavax.accessibility.assistive_technologies=",
+                    "-Djna.nosys=true",
+                    // Ces options sont cruciales pour résoudre le problème de thread
+                    "-Dapple.awt.UIElement=true",
+                    "-Dlwjgl.osxthreads=true"
+                ] : [];
 
-            let opts = {
-                authorization: Authenticator.getAuth(store.get("username")),
-                root: path.join(dataPath),
-                verify: true,
-                timeout: 10000,
-                version: {
-                    number: "1.7.10",
-                    type: "release"
-                },
-                forge: path.join(dataPath, "forge.jar"),
-                javaPath: javaPath,
-                memory: {
-                    min: store.get('ramSettings').ramMin,
-                    max: store.get('ramSettings').ramMax
-                },
-                // Ajout des arguments JVM spécifiques à macOS
-                javaArgs: macOsJvmArgs,
-                quickPlay: {
-                    type: "legacy",
-                    identifier: "88.151.197.30:25565",
-                    legacy: null,
-                }
-            };
+                let opts = {
+                    authorization: Authenticator.getAuth(store.get("username")),
+                    root: path.join(dataPath),
+                    verify: true,
+                    timeout: 10000,
+                    version: {
+                        number: "1.7.10",
+                        type: "release"
+                    },
+                    forge: path.join(dataPath, "forge.jar"),
+                    javaPath: javaPath,
+                    memory: {
+                        min: store.get('ramSettings').ramMin,
+                        max: store.get('ramSettings').ramMax
+                    },
+                    javaArgs: macOsJvmArgs,
+                    quickPlay: {
+                        type: "legacy",
+                        identifier: "88.151.197.30:25565",
+                        legacy: null,
+                    }
+                };
 
             launcher.launch(opts);
             
