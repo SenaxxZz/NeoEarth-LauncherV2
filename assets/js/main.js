@@ -4,6 +4,7 @@ const fs = require("fs");
 require('dotenv').config();
 const { xml2json } = require("xml-js");
 const { formToJSON } = require("axios");
+const { exec } = require('child_process');
 
 let modsList = [];
 fs.readdir(path.join(dataPath, "mods"), (err, modList) => {
@@ -325,64 +326,77 @@ document.getElementById("launch")?.addEventListener("click", async () => {
             ? path.join(dataPath, "jre1.8.0_381/Contents/Home/bin/java") // Chemin pour macOS
             : path.join(dataPath, "jre1.8.0_381/bin/java"); // Chemin pour Windows
 
-        let opts = {
-            authorization: Authenticator.getAuth(store.get("username")),
-            root: path.join(dataPath),
-            verify: true,
-            timeout: 10000,
-            version: {
-                number: "1.7.10",
-                type: "release"
-            },
-            forge: path.join(dataPath, "forge.jar"),
-            javaPath: javaPath,
-            memory: {
-                min: store.get('ramSettings').ramMin,
-                max: store.get('ramSettings').ramMax
-            },
-            quickPlay: {
-                type: "legacy",
-                identifier: "88.151.197.30:25565",
-                legacy: null,
+        // Set permissions to allow execution
+        exec(`chmod +x ${javaPath}`, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`Erreur lors de la modification des permissions: ${error.message}`);
+                return;
             }
-        };
-
-        launcher.launch(opts);
-        launcher.on('debug', (e) => {
-            ipcRenderer.send("log", e);
-            const logMessage = document.createElement("p");
-            if (e.includes("/ERROR")) {
-                logMessage.style.color = "red";
-            } else if (e.includes("/WARN")) {
-                logMessage.style.color = "orange";
-            } else {
-                logMessage.style.color = "white";
+            if (stderr) {
+                console.error(`Erreur: ${stderr}`);
+                return;
             }
-            logMessage.innerText = e;
+            console.log(`Permissions modifiées: ${stdout}`);
 
-            const logConsole = document.getElementById("eventLog");
-            logConsole.appendChild(logMessage);
-        });
-        launcher.on('data', (e) => {
-            ipcRenderer.send("log", e);
-            const logMessage = document.createElement("p");
-            if (e.includes("/ERROR")) {
-                logMessage.style.color = "red";
-            } else if (e.includes("/WARN")) {
-                logMessage.style.color = "orange";
-            } else {
-                logMessage.style.color = "white";
-            }
-            logMessage.innerText = e;
+            let opts = {
+                authorization: Authenticator.getAuth(store.get("username")),
+                root: path.join(dataPath),
+                verify: true,
+                timeout: 10000,
+                version: {
+                    number: "1.7.10",
+                    type: "release"
+                },
+                forge: path.join(dataPath, "forge.jar"),
+                javaPath: javaPath,
+                memory: {
+                    min: store.get('ramSettings').ramMin,
+                    max: store.get('ramSettings').ramMax
+                },
+                quickPlay: {
+                    type: "legacy",
+                    identifier: "88.151.197.30:25565",
+                    legacy: null,
+                }
+            };
 
-            const logConsole = document.getElementById("eventLog");
-            logConsole.appendChild(logMessage);
+            launcher.launch(opts);
+            launcher.on('debug', (e) => {
+                ipcRenderer.send("log", e);
+                const logMessage = document.createElement("p");
+                if (e.includes("/ERROR")) {
+                    logMessage.style.color = "red";
+                } else if (e.includes("/WARN")) {
+                    logMessage.style.color = "orange";
+                } else {
+                    logMessage.style.color = "white";
+                }
+                logMessage.innerText = e;
 
-            setTimeout(() => {
-                if (store.get("KeepLauncherOpen") == false || store.get("KeepLauncherOpen") == null) {
-                    ipcRenderer.send("quit");
-                } 
-            }, 20000);
+                const logConsole = document.getElementById("eventLog");
+                logConsole.appendChild(logMessage);
+            });
+            launcher.on('data', (e) => {
+                ipcRenderer.send("log", e);
+                const logMessage = document.createElement("p");
+                if (e.includes("/ERROR")) {
+                    logMessage.style.color = "red";
+                } else if (e.includes("/WARN")) {
+                    logMessage.style.color = "orange";
+                } else {
+                    logMessage.style.color = "white";
+                }
+                logMessage.innerText = e;
+
+                const logConsole = document.getElementById("eventLog");
+                logConsole.appendChild(logMessage);
+
+                setTimeout(() => {
+                    if (store.get("KeepLauncherOpen") == false || store.get("KeepLauncherOpen") == null) {
+                        ipcRenderer.send("quit");
+                    } 
+                }, 20000);
+            });
         });
     }
 });
