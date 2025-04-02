@@ -326,7 +326,6 @@ if (filesInstalled == totalFiles) {
     const macOsArgs = process.platform === 'darwin' ? [
         "-XstartOnFirstThread",
         "-Djava.awt.headless=true",
-        "-Dorg.lwjgl.opengl.Display.allowSoftwareOpenGL=true",
         "-Dorg.lwjgl.librarypath=" + path.join(dataPath, "natives", "macos"),
         "-Dorg.lwjgl.util.NoChecks=true",
         "-Dfml.ignoreInvalidMinecraftCertificates=true",
@@ -334,19 +333,6 @@ if (filesInstalled == totalFiles) {
         "-XX:-UseAdaptiveSizePolicy",
         "-XX:+DisableExplicitGC"
     ] : [];
-
-    const requiredMacNatives = [
-        'liblwjgl.dylib',
-        'libopenal.dylib',
-        'libjinput-osx.jnilib'
-    ];
-
-    requiredMacNatives.forEach(native => {
-        if (!fs.existsSync(path.join(dataPath, "natives", "macos", native))) {
-            ipcRenderer.send("log", `FICHIER NATIF MANQUANT: ${native}`);
-            throw new Error(`Fichier natif manquant: ${native}`);
-        }
-    });
 
     let opts = {
         authorization: Authenticator.getAuth(store.get("username")),
