@@ -99,7 +99,6 @@ if (avatarElement) {
             const tag = document.createElement("h3");
             tag.innerText = newsItem.tags;
 
-            // Nouvelle structure pour la section auteur
             const authorSection = document.createElement("div");
             authorSection.className = "author-section";
 
@@ -121,13 +120,11 @@ if (avatarElement) {
             date.className = "date-news";
             date.innerText = newsItem.publishedAt;
 
-            // Structure de la carte
             divNews.appendChild(card);
             card.appendChild(img);
             card.appendChild(title);
             card.appendChild(tag);
 
-            // Ajout de la section auteur
             authorInfo.appendChild(author);
             authorInfo.appendChild(date);
             authorSection.appendChild(avatar);
@@ -185,20 +182,16 @@ document.getElementById("close-error")?.addEventListener("click", () => {
     document.getElementById("LogConsole").style = "display: none;";
 });
 
-// === GESTION DU MENU SOCIAL - VERSION SIMPLIFIÉE ===
-// On utilise un gestionnaire global pour le menu
 const socialMenuManager = (function() {
     const menuBtn = document.getElementById("menuBtn");
     const menu = document.getElementById("menu");
     if (!menuBtn || !menu) return;
 
-    // Délai plus long pour éviter les fermetures accidentelles
     let menuDelay = 150;
     let menuTimeout = null;
     let isMouseOverMenu = false;
     let isMouseOverButton = false;
 
-    // Fonctions de gestion
     function showMenu() {
         clearTimeout(menuTimeout);
         menu.classList.remove("hidden");
@@ -208,7 +201,6 @@ const socialMenuManager = (function() {
     }
 
     function scheduleHideMenu() {
-        // Ne fermer que si la souris n'est ni sur le bouton ni sur le menu
         if (!isMouseOverButton && !isMouseOverMenu) {
             menuTimeout = setTimeout(() => {
                 menu.classList.add("hidden");
@@ -219,7 +211,6 @@ const socialMenuManager = (function() {
         }
     }
 
-    // Événements pour le bouton
     menuBtn.addEventListener("mouseenter", () => {
         isMouseOverButton = true;
         showMenu();
@@ -230,7 +221,6 @@ const socialMenuManager = (function() {
         scheduleHideMenu();
     });
 
-    // Événements pour le menu
     menu.addEventListener("mouseenter", () => {
         isMouseOverMenu = true;
         showMenu();
@@ -241,7 +231,6 @@ const socialMenuManager = (function() {
         scheduleHideMenu();
     });
 
-    // Empêcher que le menu se ferme lors d'un clic sur un élément du menu
     menu.addEventListener("click", (e) => {
         e.stopPropagation();
     });
@@ -257,7 +246,6 @@ document.getElementById("launch")?.addEventListener("click", async () => {
     let filesInstalled = 0;
     var temp = true;
 
-    // Détection de la plateforme pour utiliser la bonne API
     const platform = process.platform === 'darwin' ? 'darwin' : 'win';
     const response = await axios.get(`https://apiprod.neoearth-mc.fr/launcher/version/neoearth-mc/${platform}`);
 
@@ -313,7 +301,6 @@ document.getElementById("launch")?.addEventListener("click", async () => {
         }
     }
     
-    // Remplacer toute la section dans la condition if (filesInstalled == totalFiles)
 
 if (filesInstalled == totalFiles) {
     const logMessage = document.createElement("p");
@@ -324,12 +311,10 @@ if (filesInstalled == totalFiles) {
     const logConsole = document.getElementById("eventLog");
     logConsole.appendChild(logMessage);
 
-    // Chemin Java adapté à la plateforme
     const javaPath = process.platform === 'darwin' 
         ? path.join(dataPath, "jre1.8.0_381/Contents/Home/bin/java") 
         : path.join(dataPath, "jre1.8.0_381/bin/java");
 
-    // Sur macOS, s'assurer que le fichier java est exécutable
     if (process.platform === 'darwin') {
         try {
             fs.chmodSync(javaPath, '755');
@@ -338,17 +323,31 @@ if (filesInstalled == totalFiles) {
         }
     }
 
-    // Configuration spéciale pour macOS
     const macOsArgs = process.platform === 'darwin' ? [
         "-XstartOnFirstThread",
-        "-Djava.awt.headless=true", 
+        "-Djava.awt.headless=true",
         "-Dorg.lwjgl.opengl.Display.allowSoftwareOpenGL=true",
-        "-Dorg.lwjgl.librarypath=" + path.join(dataPath, "natives"),
+        "-Dorg.lwjgl.librarypath=" + path.join(dataPath, "natives", "macos"),
+        "-Dorg.lwjgl.util.NoChecks=true",
         "-Dfml.ignoreInvalidMinecraftCertificates=true",
-        "-Dfml.ignorePatchDiscrepancies=true"
+        "-Dfml.ignorePatchDiscrepancies=true",
+        "-XX:-UseAdaptiveSizePolicy",
+        "-XX:+DisableExplicitGC"
     ] : [];
 
-    // Utiliser minecraft-launcher-core pour les deux plateformes
+    const requiredMacNatives = [
+        'liblwjgl.dylib',
+        'libopenal.dylib',
+        'libjinput-osx.jnilib'
+    ];
+
+    requiredMacNatives.forEach(native => {
+        if (!fs.existsSync(path.join(dataPath, "natives", "macos", native))) {
+            ipcRenderer.send("log", `FICHIER NATIF MANQUANT: ${native}`);
+            throw new Error(`Fichier natif manquant: ${native}`);
+        }
+    });
+
     let opts = {
         authorization: Authenticator.getAuth(store.get("username")),
         root: path.join(dataPath),
@@ -364,7 +363,7 @@ if (filesInstalled == totalFiles) {
             min: store.get('ramSettings').ramMin,
             max: store.get('ramSettings').ramMax
         },
-        javaArgs: macOsArgs, // Arguments JVM spécifiques à macOS
+        javaArgs: macOsArgs,
         quickPlay: {
             type: "legacy",
             identifier: "88.151.197.30:25565",
@@ -372,10 +371,9 @@ if (filesInstalled == totalFiles) {
         }
     };
 
-    // Lancer le jeu avec les options configurées
+
     launcher.launch(opts);
     
-    // Gérer les événements du launcher
     launcher.on('debug', (e) => {
         ipcRenderer.send("log", e);
         const logMessage = document.createElement("p");
