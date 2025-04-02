@@ -315,6 +315,7 @@ if (filesInstalled == totalFiles) {
         ? path.join(dataPath, "jre1.8.0_381/Contents/Home/bin/java") 
         : path.join(dataPath, "jre1.8.0_381/bin/java");
 
+
     if (process.platform === 'darwin') {
         try {
             fs.chmodSync(javaPath, '755');
@@ -322,16 +323,24 @@ if (filesInstalled == totalFiles) {
             console.error(`Erreur lors de la modification des permissions: ${error.message}`);
         }
     }
-
+    
+    // Voici les arguments corrigés pour macOS
+// Voici les arguments corrigés pour macOS
     const macOsArgs = process.platform === 'darwin' ? [
         "-XstartOnFirstThread",
-        "-Djava.awt.headless=true",
-        "-Dorg.lwjgl.librarypath=" + path.join(dataPath, "natives", "macos"),
-        "-Dorg.lwjgl.util.NoChecks=true",
+        "-Djava.awt.headless=false",
+        "-Dapple.awt.application.name=Minecraft",
+        "-Dorg.lwjgl.opengl.Display.allowSoftwareOpenGL=true",
+        "-Dapple.awt.graphics.EnableQ2DX=true",
+        "-Dapple.awt.UIElement=true", 
+        "-Dlwjgl.osxthreads=true",
+        "-Dapple.awt.graphics.UseOpenGL=true",
+        // Ce paramètre est crucial pour éviter l'erreur de thread sur macOS
+        "-Dorg.lwjgl.opengl.Window.undecorated=true",
+        // Ce paramètre désactive les fonctions de redimensionnement problématiques
+        "-Dorg.lwjgl.opengl.Display.enableHighDPI=true",
         "-Dfml.ignoreInvalidMinecraftCertificates=true",
-        "-Dfml.ignorePatchDiscrepancies=true",
-        "-XX:-UseAdaptiveSizePolicy",
-        "-XX:+DisableExplicitGC"
+        "-Dfml.ignorePatchDiscrepancies=true"
     ] : [];
 
     let opts = {
