@@ -255,11 +255,11 @@ document.getElementById("launch")?.addEventListener("click", async () => {
     document.getElementById("LogConsole").style.display = "block";
     let filesInstalled = 0;
     var temp = true;
-    
+
     // Détection de la plateforme pour utiliser la bonne API
     const platform = process.platform === 'darwin' ? 'darwin' : 'win';
     const response = await axios.get(`https://apiprod.neoearth-mc.fr/launcher/version/neoearth-mc/${platform}`);
-    
+
     const files = response.data.files;
     const totalFiles = response.data.totalFiles;
     for (let sa = 0; filesInstalled < files.length && temp; filesInstalled++) {
@@ -319,12 +319,12 @@ document.getElementById("launch")?.addEventListener("click", async () => {
 
         const logConsole = document.getElementById("eventLog");
         logConsole.appendChild(logMessage);
-        
+
         // Chemin Java adapté à la plateforme
         const javaPath = process.platform === 'darwin' 
             ? path.join(dataPath, "jre1.8.0_381/Contents/Home/bin/java") // Chemin pour macOS
             : path.join(dataPath, "jre1.8.0_381/bin/java"); // Chemin pour Windows
-            
+
         let opts = {
             authorization: Authenticator.getAuth(store.get("username")),
             root: path.join(dataPath),
