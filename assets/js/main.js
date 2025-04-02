@@ -341,12 +341,11 @@ if (filesInstalled == totalFiles) {
     // Configuration spéciale pour macOS
     const macOsArgs = process.platform === 'darwin' ? [
         "-XstartOnFirstThread",
-        "-Djava.awt.headless=false",
-        "-Dapple.awt.application.name=Minecraft",
-        "-Dapple.awt.graphics.UseQuartz=true",
+        "-Djava.awt.headless=true", 
         "-Dorg.lwjgl.opengl.Display.allowSoftwareOpenGL=true",
-        "-Dlwjgl.osxthreads=true",
-        "-Dapple.awt.UIElement=true"
+        "-Dorg.lwjgl.librarypath=" + path.join(dataPath, "natives"),
+        "-Dfml.ignoreInvalidMinecraftCertificates=true",
+        "-Dfml.ignorePatchDiscrepancies=true"
     ] : [];
 
     // Utiliser minecraft-launcher-core pour les deux plateformes
