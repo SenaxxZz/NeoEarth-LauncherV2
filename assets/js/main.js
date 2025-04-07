@@ -336,9 +336,12 @@ document.getElementById("launch")?.addEventListener("click", async () => {
                 "-Dapple.awt.application.name=NeoEarth-MC",
                 "-Dapple.awt.application.appearance=system",
                 "-Dapple.laf.useScreenMenuBar=true",
-                // Fix for the window resizing crash:
+                "-Dawt.nativeDoubleBuffering=false",
+                "-Dapple.awt.graphics.UseQuartz=true", 
                 "-Dorg.lwjgl.opengl.Display.allowSoftwareOpenGL=true",
-                "-Dorg.lwjgl.opengl.Display.enableHighDPI=true"
+                "-Dorg.lwjgl.opengl.Display.enableHighDPI=true",
+                "-Dswing.crossplatformlaf=com.apple.laf.AquaLookAndFeel", 
+                "-Dorg.lwjgl.opengl.Window.Window.backgroundThread=false"
             ];
         }
     
@@ -363,7 +366,28 @@ document.getElementById("launch")?.addEventListener("click", async () => {
                 identifier: "88.151.197.30:25565",
                 legacy: null,
             }
-        };    
+        };
+        
+        // Add macOS-specific environment variables
+        if (process.platform === 'darwin') {
+            opts.environmentVariables = {
+                "DYLD_LIBRARY_PATH": path.join(dataPath, "natives"),
+                "AWT_TOOLKIT": "sun.lwawt.macosx.LWCToolkit"
+            };
+            
+            // Special pre-launch setup for macOS
+            const macosPrep = document.createElement("p");
+            macosPrep.innerText = "Préparation de l'environnement macOS...";
+            macosPrep.style.color = "yellow";
+            const logConsole = document.getElementById("eventLog");
+            logConsole.appendChild(macosPrep);
+            
+            // Create natives directory if it doesn't exist
+            const nativesDir = path.join(dataPath, "natives");
+            if (!fs.existsSync(nativesDir)) {
+                fs.mkdirSync(nativesDir, { recursive: true });
+            }
+        } 
 
 
     launcher.launch(opts);
