@@ -463,12 +463,42 @@ document.getElementById("launch")?.addEventListener("click", async () => {
             const patchedLibPath = path.join(nativesDir, "liblwjgl.jnilib");
             
             // Use environment variables to ensure macOS uses our patched libraries
-            opts.environmentVariables = {
-                "DYLD_LIBRARY_PATH": nativesDir,
-                "AWT_TOOLKIT": "sun.lwawt.macosx.LWCToolkit",
-                "DYLD_INSERT_LIBRARIES": patchedLibPath,
-                "DYLD_FORCE_FLAT_NAMESPACE": "1"
-            };
+// After your setupMacOSNatives function completes:
+if (process.platform === 'darwin') {
+    // Add these important environment variables for MacOS
+    opts.environmentVariables = {
+        "DYLD_LIBRARY_PATH": path.join(dataPath, "natives"),
+        "AWT_TOOLKIT": "sun.lwawt.macosx.LWCToolkit",
+        "DYLD_INSERT_LIBRARIES": path.join(dataPath, "natives", "liblwjgl.jnilib"),
+        "DYLD_FORCE_FLAT_NAMESPACE": "1"
+    };
+
+    // Add these to your javaArgs
+    javaArgs.push("-Dorg.lwjgl.opengl.Display.disableOSXFullscreenModeAPI=true");
+    javaArgs.push("-Dorg.lwjgl.opengl.Display.noinput=true"); 
+    javaArgs.push("-Dapple.awt.UIElement=true");
+    
+    // Create a monitor script that will help fix the issue if it happens again
+    const fixScript = `
+    osascript -e '
+    tell application "System Events"
+        set frontProcess to first process where it is frontmost
+        set visible of frontProcess to false
+        delay 0.1
+        set visible of frontProcess to true
+    end tell'
+    `;
+    
+    // Execute this right at launch to ensure window operations happen on main thread
+    exec(fixScript);
+    
+    // Create a watcher that will execute the fix if needed
+    launcher.on('data', (e) => {
+        if (e.includes("NSInternalInconsistencyException") || e.includes("modified on the main thread")) {
+            exec(fixScript);
+        }
+    });
+}
             
             // Log macOS launch settings
             const macSettingsMsg = document.createElement("p");
