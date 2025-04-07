@@ -302,57 +302,68 @@ document.getElementById("launch")?.addEventListener("click", async () => {
     }
     
 
-if (filesInstalled == totalFiles) {
-    const logMessage = document.createElement("p");
-    console.log("Téléchargement des assets terminé.");
-    ipcRenderer.send("log", "Téléchargement des assets terminé.");
-    logMessage.innerText = `Téléchargement des assets terminé.`;
-
-    const logConsole = document.getElementById("eventLog");
-    logConsole.appendChild(logMessage);
-
-    const javaPath = process.platform === 'darwin' 
-        ? path.join(dataPath, "jre1.8.0_381/Contents/Home/bin/java") 
-        : path.join(dataPath, "jre1.8.0_381/bin/java");
-
-
-    if (process.platform === 'darwin') {
-        try {
-            fs.chmodSync(javaPath, '755');
-        } catch (error) {
-            console.error(`Erreur lors de la modification des permissions: ${error.message}`);
-        }
-    }
+    if (filesInstalled == totalFiles) {
+        const logMessage = document.createElement("p");
+        console.log("Téléchargement des assets terminé.");
+        ipcRenderer.send("log", "Téléchargement des assets terminé.");
+        logMessage.innerText = `Téléchargement des assets terminé.`;
     
-    const macOsArgs = [
-        "-XstartOnFirstThread",
-        "-Djava.awt.headless=true",
-        "-Dorg.lwjgl.opengl.Window.undecorated=true",
-        "-Dorg.lwjgl.util.NoChecks=true"
-      ];
-
-    let opts = {
-        authorization: Authenticator.getAuth(store.get("username")),
-        root: path.join(dataPath),
-        verify: true,
-        timeout: 10000,
-        version: {
-            number: "1.7.10",
-            type: "release"
-        },
-        forge: path.join(dataPath, "forge.jar"),
-        javaPath: javaPath,
-        memory: {
-            min: store.get('ramSettings').ramMin,
-            max: store.get('ramSettings').ramMax
-        },
-        javaArgs: macOsArgs,
-        quickPlay: {
-            type: "legacy",
-            identifier: "88.151.197.30:25565",
-            legacy: null,
+        const logConsole = document.getElementById("eventLog");
+        logConsole.appendChild(logMessage);
+    
+        const javaPath = process.platform === 'darwin' 
+            ? path.join(dataPath, "jre1.8.0_381/Contents/Home/bin/java") 
+            : path.join(dataPath, "jre1.8.0_381/bin/java");
+    
+    
+        if (process.platform === 'darwin') {
+            try {
+                fs.chmodSync(javaPath, '755');
+            } catch (error) {
+                console.error(`Erreur lors de la modification des permissions: ${error.message}`);
+            }
         }
-    };
+        
+        // Define platform-specific arguments
+        let javaArgs = [];
+        
+        if (process.platform === 'darwin') {
+            javaArgs = [
+                "-XstartOnFirstThread",
+                "-Djava.awt.headless=false",
+                "-Dorg.lwjgl.opengl.Window.undecorated=true",
+                "-Dorg.lwjgl.util.NoChecks=true",
+                "-Dapple.awt.application.name=NeoEarth-MC",
+                "-Dapple.awt.application.appearance=system",
+                "-Dapple.laf.useScreenMenuBar=true",
+                // Fix for the window resizing crash:
+                "-Dorg.lwjgl.opengl.Display.allowSoftwareOpenGL=true",
+                "-Dorg.lwjgl.opengl.Display.enableHighDPI=true"
+            ];
+        }
+    
+        let opts = {
+            authorization: Authenticator.getAuth(store.get("username")),
+            root: path.join(dataPath),
+            verify: true,
+            timeout: 10000,
+            version: {
+                number: "1.7.10",
+                type: "release"
+            },
+            forge: path.join(dataPath, "forge.jar"),
+            javaPath: javaPath,
+            memory: {
+                min: store.get('ramSettings').ramMin,
+                max: store.get('ramSettings').ramMax
+            },
+            javaArgs: javaArgs,
+            quickPlay: {
+                type: "legacy",
+                identifier: "88.151.197.30:25565",
+                legacy: null,
+            }
+        };    
 
 
     launcher.launch(opts);
