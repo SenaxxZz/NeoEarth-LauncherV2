@@ -300,110 +300,101 @@ document.getElementById("launch")?.addEventListener("click", async () => {
             temp = false;
         }
     }
+    
 
-    if (filesInstalled == totalFiles) {
+if (filesInstalled == totalFiles) {
+    const logMessage = document.createElement("p");
+    console.log("Téléchargement des assets terminé.");
+    ipcRenderer.send("log", "Téléchargement des assets terminé.");
+    logMessage.innerText = `Téléchargement des assets terminé.`;
+
+    const logConsole = document.getElementById("eventLog");
+    logConsole.appendChild(logMessage);
+
+    const javaPath = process.platform === 'darwin' 
+        ? path.join(dataPath, "jre1.8.0_381/Contents/Home/bin/java") 
+        : path.join(dataPath, "jre1.8.0_381/bin/java");
+
+
+    if (process.platform === 'darwin') {
+        try {
+            fs.chmodSync(javaPath, '755');
+        } catch (error) {
+            console.error(`Erreur lors de la modification des permissions: ${error.message}`);
+        }
+    }
+    
+    const macOsArgs = [
+        "-XstartOnFirstThread",
+        "-Djava.awt.headless=true",
+        "-Dorg.lwjgl.opengl.Window.undecorated=true",
+        "-Dorg.lwjgl.util.NoChecks=true"
+      ];
+
+    let opts = {
+        authorization: Authenticator.getAuth(store.get("username")),
+        root: path.join(dataPath),
+        verify: true,
+        timeout: 10000,
+        version: {
+            number: "1.7.10",
+            type: "release"
+        },
+        forge: path.join(dataPath, "forge.jar"),
+        javaPath: javaPath,
+        memory: {
+            min: store.get('ramSettings').ramMin,
+            max: store.get('ramSettings').ramMax
+        },
+        javaArgs: macOsArgs,
+        quickPlay: {
+            type: "legacy",
+            identifier: "88.151.197.30:25565",
+            legacy: null,
+        }
+    };
+
+
+    launcher.launch(opts);
+    
+    launcher.on('debug', (e) => {
+        ipcRenderer.send("log", e);
         const logMessage = document.createElement("p");
-        console.log("Téléchargement des assets terminé.");
-        ipcRenderer.send("log", "Téléchargement des assets terminé.");
-        logMessage.innerText = `Téléchargement des assets terminé.`;
+        if (e.includes("/ERROR")) {
+            logMessage.style.color = "red";
+        } else if (e.includes("/WARN")) {
+            logMessage.style.color = "orange";
+        } else {
+            logMessage.style.color = "white";
+        }
+        logMessage.innerText = e;
 
         const logConsole = document.getElementById("eventLog");
         logConsole.appendChild(logMessage);
-
-        const javaPath = process.platform === 'darwin' 
-            ? path.join(dataPath, "jre1.8.0_381/Contents/Home/bin/java") 
-            : path.join(dataPath, "jre1.8.0_381/bin/java");
-
-
-        if (process.platform === 'darwin') {
-            try {
-                fs.chmodSync(javaPath, '755');
-            } catch (error) {
-                console.error(`Erreur lors de la modification des permissions: ${error.message}`);
-            }
+    });
+    
+    launcher.on('data', (e) => {
+        ipcRenderer.send("log", e);
+        const logMessage = document.createElement("p");
+        if (e.includes("/ERROR")) {
+            logMessage.style.color = "red";
+        } else if (e.includes("/WARN")) {
+            logMessage.style.color = "orange";
+        } else {
+            logMessage.style.color = "white";
         }
+        logMessage.innerText = e;
 
-        // Voici les arguments corrigés pour macOS
-        const macOsArgs = process.platform === 'darwin' ? [
-            "-XstartOnFirstThread",
-            "-Djava.awt.headless=false",
-            "-Dapple.awt.application.name=Minecraft",
-            "-Dorg.lwjgl.opengl.Display.allowSoftwareOpenGL=true",
-            "-Dapple.awt.graphics.EnableQ2DX=true",
-            "-Dapple.awt.UIElement=true", 
-            "-Dlwjgl.osxthreads=true",
-            "-Dapple.awt.graphics.UseOpenGL=true",
-            // Ce paramètre est crucial pour éviter l'erreur de thread sur macOS
-            "-Dorg.lwjgl.opengl.Window.undecorated=true",
-            // Ce paramètre désactive les fonctions de redimensionnement problématiques
-            "-Dorg.lwjgl.opengl.Display.enableHighDPI=true",
-            "-Dfml.ignoreInvalidMinecraftCertificates=true",
-            "-Dfml.ignorePatchDiscrepancies=true"
-        ] : [];
-
-        let opts = {
-            authorization: Authenticator.getAuth(store.get("username")),
-            root: path.join(dataPath),
-            verify: true,
-            timeout: 10000,
-            version: {
-                number: "1.7.10",
-                type: "release"
-            },
-            forge: path.join(dataPath, "forge.jar"),
-            javaPath: javaPath,
-            memory: {
-                min: store.get('ramSettings').ramMin,
-                max: store.get('ramSettings').ramMax
-            },
-            javaArgs: macOsArgs,
-            quickPlay: {
-                type: "legacy",
-                identifier: "88.151.197.30:25565",
-                legacy: null,
-            }
-        };
-
-        launcher.launch(opts);
-
-        launcher.on('debug', (e) => {
-            ipcRenderer.send("log", e);
-            const logMessage = document.createElement("p");
-            if (e.includes("/ERROR")) {
-                logMessage.style.color = "red";
-            } else if (e.includes("/WARN")) {
-                logMessage.style.color = "orange";
-            } else {
-                logMessage.style.color = "white";
-            }
-            logMessage.innerText = e;
-
-            const logConsole = document.getElementById("eventLog");
-            logConsole.appendChild(logMessage);
-        });
-
-        launcher.on('data', (e) => {
-            ipcRenderer.send("log", e);
-            const logMessage = document.createElement("p");
-            if (e.includes("/ERROR")) {
-                logMessage.style.color = "red";
-            } else if (e.includes("/WARN")) {
-                logMessage.style.color = "orange";
-            } else {
-                logMessage.style.color = "white";
-            }
-            logMessage.innerText = e;
-
-            const logConsole = document.getElementById("eventLog");
-            logConsole.appendChild(logMessage);
-        });
-
-        launcher.on('close', () => {
-            if (store.get("KeepLauncherOpen") == false || store.get("KeepLauncherOpen") == null) {
-                setTimeout(() => {
-                    ipcRenderer.send("quit");
-                }, 5000);
-            }
-        });
+        const logConsole = document.getElementById("eventLog");
+        logConsole.appendChild(logMessage);
+    });
+    
+    launcher.on('close', () => {
+        if (store.get("KeepLauncherOpen") == false || store.get("KeepLauncherOpen") == null) {
+            setTimeout(() => {
+                ipcRenderer.send("quit");
+            }, 5000);
+        }
+    });
     }
-});
+})
