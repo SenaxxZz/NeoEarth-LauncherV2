@@ -1,16 +1,10 @@
 const { Client, Authenticator } = require("minecraft-launcher-core");
 const launcher = new Client();
 const fs = require("fs");
-const path = require("path");
-const axios = require("axios");
-const { ipcRenderer, shell } = require("electron");
-const Downloader = require("nodejs-file-downloader");
 require('dotenv').config();
 const { xml2json } = require("xml-js");
 const { formToJSON } = require("axios");
 const { exec } = require('child_process');
-const store = require('electron-store');
-const dataPath = path.join(process.env.APPDATA || (process.platform === 'darwin' ? process.env.HOME + '/Library/Application Support' : process.env.HOME + '/.local/share'), ".neoearth-mc");
 
 // Fix mod management
 let modsList = [];
@@ -378,8 +372,8 @@ document.getElementById("launch")?.addEventListener("click", async () => {
         });
         try {
             await downloadFile.download();
-            console.log("Telechargement fini du fichier : " + file.name);
-            ipcRenderer.send("log", "Telechargement fini du fichier : " + file.name);
+            // console.log("Telechargement fini du fichier : " + file.name);
+            // ipcRenderer.send("log", "Telechargement fini du fichier : " + file.name);
             return;
         } catch (e) {
             ipcRenderer.send("log", e);
@@ -394,10 +388,10 @@ document.getElementById("launch")?.addEventListener("click", async () => {
     if (filesInstalled == totalFiles) {
         const logConsole = document.getElementById("eventLog");
         const logMessage = document.createElement("p");
-        console.log("Téléchargement des assets terminé.");
-        ipcRenderer.send("log", "Téléchargement des assets terminé.");
-        logMessage.innerText = `Téléchargement des assets terminé.`;
-        logConsole.appendChild(logMessage);
+        // console.log("Téléchargement des assets terminé.");
+        // ipcRenderer.send("log", "Téléchargement des assets terminé.");
+        // logMessage.innerText = `Téléchargement des assets terminé.`;
+        // logConsole.appendChild(logMessage);
     
         // Platform-specific Java path
         const javaPath = process.platform === 'darwin' 
