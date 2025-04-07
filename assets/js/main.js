@@ -1,11 +1,18 @@
 const { Client, Authenticator } = require("minecraft-launcher-core");
 const launcher = new Client();
 const fs = require("fs");
+const path = require("path");
+const axios = require("axios");
+const { ipcRenderer, shell } = require("electron");
+const Downloader = require("nodejs-file-downloader");
 require('dotenv').config();
 const { xml2json } = require("xml-js");
 const { formToJSON } = require("axios");
 const { exec } = require('child_process');
+const store = require('electron-store');
+const dataPath = path.join(process.env.APPDATA || (process.platform === 'darwin' ? process.env.HOME + '/Library/Application Support' : process.env.HOME + '/.local/share'), ".neoearth-mc");
 
+// Fix mod management
 let modsList = [];
 fs.readdir(path.join(dataPath, "mods"), (err, modList) => {
     if (err) return;
@@ -26,6 +33,7 @@ fs.readdir(path.join(dataPath, "mods"), (err, modList) => {
     }
 });
 
+// User information
 const username = store.get("username");
 const rank = store.get("rank");
 
@@ -48,6 +56,7 @@ if (avatarElement) {
     };
 }
 
+// News fetching
 (async () => {
     const divNews = document.getElementById("cards-container");
 
@@ -134,6 +143,7 @@ if (avatarElement) {
     }
 })();
 
+// External links
 document.getElementById("cards-container")?.addEventListener("click", (event) => {
     shell.openExternal("https://www.neoearth-mc.fr");
 });
@@ -166,6 +176,7 @@ document.getElementById("radio").addEventListener("click", (event) => {
     shell.openExternal("https://radio.neoearth-mc.fr");
 });
 
+// Window controls
 document.getElementById("close")?.addEventListener("click", () => {
     ipcRenderer.send("quit");
 });
@@ -182,6 +193,7 @@ document.getElementById("close-error")?.addEventListener("click", () => {
     document.getElementById("LogConsole").style = "display: none;";
 });
 
+// Social menu manager
 const socialMenuManager = (function() {
     const menuBtn = document.getElementById("menuBtn");
     const menu = document.getElementById("menu");
@@ -241,6 +253,84 @@ const socialMenuManager = (function() {
     };
 })();
 
+// macOS LWJGL Fix Helper Functions
+async function setupMacOSNatives(logConsole, javaPath) {
+    try {
+        const nativesDir = path.join(dataPath, "natives");
+        
+        // Create natives directory if it doesn't exist
+        if (!fs.existsSync(nativesDir)) {
+            fs.mkdirSync(nativesDir, { recursive: true });
+        }
+        
+        const logMessage = document.createElement("p");
+        logMessage.innerText = "Configuration des natives LWJGL pour macOS...";
+        logMessage.style.color = "yellow";
+        logConsole.appendChild(logMessage);
+        
+        // Check if we already have the patched library
+        const patchedLibPath = path.join(nativesDir, "liblwjgl.jnilib");
+        const patchMarker = path.join(dataPath, ".lwjgl_patched");
+        
+        if (!fs.existsSync(patchedLibPath) || !fs.existsSync(patchMarker)) {
+            // Download the patched library from a reliable source
+            const patchedLibUrl = "https://github.com/Tech1k/lwjgl-mac-fix/raw/main/liblwjgl.jnilib";
+            
+            const downloadPatch = new Downloader({
+                url: patchedLibUrl,
+                directory: nativesDir,
+                fileName: "liblwjgl.jnilib",
+                cloneFiles: false,
+                onProgress: function(percentage) {
+                    logMessage.innerText = `Téléchargement des correctifs macOS: ${percentage}%`;
+                }
+            });
+            
+            try {
+                await downloadPatch.download();
+                
+                // Set executable permissions
+                fs.chmodSync(patchedLibPath, "755");
+                
+                // Create patch marker
+                fs.writeFileSync(patchMarker, "patched", "utf8");
+                
+                logMessage.innerText = "✅ Configuration macOS terminée avec succès";
+                logMessage.style.color = "green";
+            } catch (downloadError) {
+                logMessage.innerText = `❌ Erreur de téléchargement du correctif: ${downloadError.message}`;
+                logMessage.style.color = "red";
+                console.error("Erreur de téléchargement:", downloadError);
+            }
+        } else {
+            logMessage.innerText = "✅ Correctifs macOS déjà installés";
+            logMessage.style.color = "green";
+        }
+        
+        // Make sure all other JNI libraries in natives dir are executable
+        try {
+            const nativeFiles = fs.readdirSync(nativesDir);
+            for (const file of nativeFiles) {
+                if (file.endsWith('.jnilib') || file.endsWith('.dylib')) {
+                    fs.chmodSync(path.join(nativesDir, file), "755");
+                }
+            }
+        } catch (chmodError) {
+            console.error("Erreur lors de la modification des permissions:", chmodError);
+        }
+        
+        return true;
+    } catch (error) {
+        const errorMsg = document.createElement("p");
+        errorMsg.innerText = `❌ Erreur de configuration macOS: ${error.message}`;
+        errorMsg.style.color = "red";
+        logConsole.appendChild(errorMsg);
+        console.error("Erreur de configuration macOS:", error);
+        return false;
+    }
+}
+
+// Launch game
 document.getElementById("launch")?.addEventListener("click", async () => {
     document.getElementById("LogConsole").style.display = "block";
     let filesInstalled = 0;
@@ -294,57 +384,62 @@ document.getElementById("launch")?.addEventListener("click", async () => {
         } catch (e) {
             ipcRenderer.send("log", e);
             console.log(e);
-            ipcRenderer.send("log", "Erreur de téléchargement pour : " + path);
-            console.log("Erreur de téléchargement pour : " + path);
-            console.log(path);
+            ipcRenderer.send("log", "Erreur de téléchargement pour : " + file.path);
+            console.log("Erreur de téléchargement pour : " + file.path);
+            console.log(file.path);
             temp = false;
         }
     }
     
-
     if (filesInstalled == totalFiles) {
+        const logConsole = document.getElementById("eventLog");
         const logMessage = document.createElement("p");
         console.log("Téléchargement des assets terminé.");
         ipcRenderer.send("log", "Téléchargement des assets terminé.");
         logMessage.innerText = `Téléchargement des assets terminé.`;
-    
-        const logConsole = document.getElementById("eventLog");
         logConsole.appendChild(logMessage);
     
+        // Platform-specific Java path
         const javaPath = process.platform === 'darwin' 
             ? path.join(dataPath, "jre1.8.0_381/Contents/Home/bin/java") 
             : path.join(dataPath, "jre1.8.0_381/bin/java");
     
-    
+        // Set proper permissions on macOS
         if (process.platform === 'darwin') {
             try {
                 fs.chmodSync(javaPath, '755');
+                
+                // Setup the macOS natives and libraries
+                await setupMacOSNatives(logConsole, javaPath);
+                
             } catch (error) {
-                console.error(`Erreur lors de la modification des permissions: ${error.message}`);
+                console.error(`Erreur lors de la configuration macOS: ${error.message}`);
+                const errorMsg = document.createElement("p");
+                errorMsg.innerText = `Erreur lors de la configuration macOS: ${error.message}`;
+                errorMsg.style.color = "red";
+                logConsole.appendChild(errorMsg);
             }
         }
         
-        // Define platform-specific arguments
-        let javaArgs = [];
+        // Platform-specific Java arguments
+        const javaArgs = process.platform === 'darwin' ? [
+            "-XstartOnFirstThread",
+            "-Djava.awt.headless=false",
+            "-Dorg.lwjgl.opengl.Window.undecorated=true",
+            "-Dorg.lwjgl.util.Debug=true", // Enable LWJGL debugging on macOS
+            "-Dorg.lwjgl.util.NoChecks=true",
+            "-Dapple.awt.application.name=NeoEarth-MC",
+            "-Dapple.awt.application.appearance=system",
+            "-Dapple.laf.useScreenMenuBar=true",
+            "-Dawt.nativeDoubleBuffering=false",
+            "-Dapple.awt.graphics.UseQuartz=true", 
+            "-Dorg.lwjgl.opengl.Display.allowSoftwareOpenGL=true",
+            "-Dorg.lwjgl.opengl.Display.enableHighDPI=true",
+            "-Dswing.crossplatformlaf=com.apple.laf.AquaLookAndFeel", 
+            "-Dorg.lwjgl.opengl.Window.Window.backgroundThread=false"
+        ] : [];
         
-        if (process.platform === 'darwin') {
-            javaArgs = [
-                "-XstartOnFirstThread",
-                "-Djava.awt.headless=false",
-                "-Dorg.lwjgl.opengl.Window.undecorated=true",
-                "-Dorg.lwjgl.util.NoChecks=true",
-                "-Dapple.awt.application.name=NeoEarth-MC",
-                "-Dapple.awt.application.appearance=system",
-                "-Dapple.laf.useScreenMenuBar=true",
-                "-Dawt.nativeDoubleBuffering=false",
-                "-Dapple.awt.graphics.UseQuartz=true", 
-                "-Dorg.lwjgl.opengl.Display.allowSoftwareOpenGL=true",
-                "-Dorg.lwjgl.opengl.Display.enableHighDPI=true",
-                "-Dswing.crossplatformlaf=com.apple.laf.AquaLookAndFeel", 
-                "-Dorg.lwjgl.opengl.Window.Window.backgroundThread=false"
-            ];
-        }
-    
+        // Configure launcher options
         let opts = {
             authorization: Authenticator.getAuth(store.get("username")),
             root: path.join(dataPath),
@@ -370,66 +465,68 @@ document.getElementById("launch")?.addEventListener("click", async () => {
         
         // Add macOS-specific environment variables
         if (process.platform === 'darwin') {
+            const nativesDir = path.join(dataPath, "natives");
+            const patchedLibPath = path.join(nativesDir, "liblwjgl.jnilib");
+            
+            // Use environment variables to ensure macOS uses our patched libraries
             opts.environmentVariables = {
-                "DYLD_LIBRARY_PATH": path.join(dataPath, "natives"),
-                "AWT_TOOLKIT": "sun.lwawt.macosx.LWCToolkit"
+                "DYLD_LIBRARY_PATH": nativesDir,
+                "AWT_TOOLKIT": "sun.lwawt.macosx.LWCToolkit",
+                "DYLD_INSERT_LIBRARIES": patchedLibPath,
+                "DYLD_FORCE_FLAT_NAMESPACE": "1"
             };
             
-            // Special pre-launch setup for macOS
-            const macosPrep = document.createElement("p");
-            macosPrep.innerText = "Préparation de l'environnement macOS...";
-            macosPrep.style.color = "yellow";
-            const logConsole = document.getElementById("eventLog");
-            logConsole.appendChild(macosPrep);
-            
-            // Create natives directory if it doesn't exist
-            const nativesDir = path.join(dataPath, "natives");
-            if (!fs.existsSync(nativesDir)) {
-                fs.mkdirSync(nativesDir, { recursive: true });
+            // Log macOS launch settings
+            const macSettingsMsg = document.createElement("p");
+            macSettingsMsg.innerText = "Configuration macOS activée";
+            macSettingsMsg.style.color = "cyan";
+            logConsole.appendChild(macSettingsMsg);
+        }
+
+        // Launch the game
+        launcher.launch(opts);
+        
+        // Handle launcher events
+        launcher.on('debug', (e) => {
+            ipcRenderer.send("log", e);
+            const logMessage = document.createElement("p");
+            if (e.includes("/ERROR")) {
+                logMessage.style.color = "red";
+            } else if (e.includes("/WARN")) {
+                logMessage.style.color = "orange";
+            } else {
+                logMessage.style.color = "white";
             }
-        } 
+            logMessage.innerText = e;
 
+            const logConsole = document.getElementById("eventLog");
+            logConsole.appendChild(logMessage);
+            logConsole.scrollTop = logConsole.scrollHeight;
+        });
+        
+        launcher.on('data', (e) => {
+            ipcRenderer.send("log", e);
+            const logMessage = document.createElement("p");
+            if (e.includes("/ERROR")) {
+                logMessage.style.color = "red";
+            } else if (e.includes("/WARN")) {
+                logMessage.style.color = "orange";
+            } else {
+                logMessage.style.color = "white";
+            }
+            logMessage.innerText = e;
 
-    launcher.launch(opts);
-    
-    launcher.on('debug', (e) => {
-        ipcRenderer.send("log", e);
-        const logMessage = document.createElement("p");
-        if (e.includes("/ERROR")) {
-            logMessage.style.color = "red";
-        } else if (e.includes("/WARN")) {
-            logMessage.style.color = "orange";
-        } else {
-            logMessage.style.color = "white";
-        }
-        logMessage.innerText = e;
-
-        const logConsole = document.getElementById("eventLog");
-        logConsole.appendChild(logMessage);
-    });
-    
-    launcher.on('data', (e) => {
-        ipcRenderer.send("log", e);
-        const logMessage = document.createElement("p");
-        if (e.includes("/ERROR")) {
-            logMessage.style.color = "red";
-        } else if (e.includes("/WARN")) {
-            logMessage.style.color = "orange";
-        } else {
-            logMessage.style.color = "white";
-        }
-        logMessage.innerText = e;
-
-        const logConsole = document.getElementById("eventLog");
-        logConsole.appendChild(logMessage);
-    });
-    
-    launcher.on('close', () => {
-        if (store.get("KeepLauncherOpen") == false || store.get("KeepLauncherOpen") == null) {
-            setTimeout(() => {
-                ipcRenderer.send("quit");
-            }, 5000);
-        }
-    });
+            const logConsole = document.getElementById("eventLog");
+            logConsole.appendChild(logMessage);
+            logConsole.scrollTop = logConsole.scrollHeight;
+        });
+        
+        launcher.on('close', () => {
+            if (store.get("KeepLauncherOpen") == false || store.get("KeepLauncherOpen") == null) {
+                setTimeout(() => {
+                    ipcRenderer.send("quit");
+                }, 5000);
+            }
+        });
     }
-})
+});
