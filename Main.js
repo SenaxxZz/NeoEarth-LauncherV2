@@ -1,196 +1,133 @@
-const { app, BrowserWindow, ipcMain, Tray, Menu, dialog } = require("electron");
+const { app, BrowserWindow, ipcMain, Tray, Menu, dialog, screen } = require("electron");
 const package = require("./package.json");
 const path = require("path");
 const express = require("express");
 const expressapp = new express();
 const http = require("http");
 const log = require("electron-log");
+let mainWindow;
 const Store = require("electron-store");
 const dataPath = path.join(app.getPath('userData'), ".neoearth-mc");
 const fs = require("fs");
 const store = new Store();
-const { exec } = require('child_process');
-let mainWindow;
 let tray = null;
 
-// Configuration spéciale pour macOS afin d'éviter l'erreur NSInternalInconsistencyException
-if (process.platform === 'darwin') {
-  // Ces options aident à prévenir les problèmes de thread sur macOS
-  app.commandLine.appendSwitch('disable-gpu-vsync');
-  app.commandLine.appendSwitch('disable-features', 'OutOfBlinkCors');
-  app.commandLine.appendSwitch('disable-threaded-scrolling');
-  app.commandLine.appendSwitch('disable-gpu-process-crash-limit');
-  app.commandLine.appendSwitch('disable-site-isolation-trials');
-  
-  // Ces options sont cruciales pour éviter les problèmes de thread sur macOS
-  app.allowRendererProcessReuse = false;
-  app.enableSandbox = false;
-}
-
-// Script AppleScript pour garantir les opérations de fenêtre sur le thread principal
-const runMacOSThreadFix = () => {
-  if (process.platform !== 'darwin') return Promise.resolve();
-  
-  return new Promise((resolve) => {
-    const fixScript = `
-    osascript -e '
-    tell application "System Events"
-      set frontProcess to first process where it is frontmost
-      set visible of frontProcess to true
-    end tell'
-    `;
-    
-    exec(fixScript, (error) => {
-      if (error) console.error("Erreur lors de l'exécution du script AppleScript:", error);
-      resolve();
-    });
-  });
-};
-
-// Création de la fenêtre principale
-const createWindow = async () => {
-  // Configuration commune de la fenêtre
-  const windowOptions = {
-    icon: path.join(__dirname, "./assets/icon/logo.png"),
-    autoHideMenuBar: true,
-    title: `${package.name} ${package.version}`,
-    width: 1200,
-    height: 700,
-    fullscreenable: true,
-    maximizable: true,
-    movable: true,
-    resizable: true,
-    webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
-      enableRemoteModule: true,
-      webSecurity: true, 
-      nodeIntegrationInWorker: true,
-      devTools: true
-    }
-  };
-
-  if (process.platform === 'darwin') {
-    // Pour macOS, on attend un court instant pour s'assurer que l'application est prête
-    await new Promise(resolve => setTimeout(resolve, 100));
-    // S'assurer que l'application apparaît dans le Dock
-    app.dock.show();
-    // Exécuter le fix thread avant de créer la fenêtre
-    await runMacOSThreadFix();
-  }
-  
-  // Créer la fenêtre
-  mainWindow = new BrowserWindow(windowOptions);
-  
-  // Configuration spécifique pour macOS
-  if (process.platform === 'darwin') {
-    // Ajouter des listeners qui évitent les modifications directes au style
-    mainWindow.on('resize', () => {
-      app.focus();
-    });
-    
-    mainWindow.on('maximize', () => {
-      app.focus();
-    });
-  }
-  
-  // Charger la page de démarrage
-  mainWindow.loadFile("./html/login.html");
-  
-  // Gestionnaire d'événement pour la fermeture
-  mainWindow.on('closed', () => {
-    mainWindow = null;
-  });
-};
-
-// Configuration des dossiers nécessaires
-const setupDirectories = () => {
-  console.log(`Dossier de données: ${dataPath}`);
-  if (!fs.existsSync(dataPath)) {
-    fs.mkdirSync(dataPath, { recursive: true });
-    console.log(`Directory .neoearth-mc created at ${dataPath}`);
+// Configuration du gestionnaire d'erreurs non capturées
+process.on('uncaughtException', (error) => {
+  log.error('Erreur non gérée:', error);
+  if (error.message && error.message.includes('NSWindow geometry')) {
+    log.info('Erreur de géométrie de fenêtre détectée, tentative de récupération...');
+    // Ne pas quitter l'application pour cette erreur spécifique
   } else {
-    console.log(`Directory .neoearth-mc already exists at ${dataPath}`);
+    app.quit();
   }
-  
-  // Création des sous-dossiers requis
-  const requiredFolders = ['mods', 'resourcepacks', 'screenshots', 'saves', 'natives'];
-  
-  requiredFolders.forEach(folder => {
-    const folderPath = path.join(dataPath, folder);
-    if (!fs.existsSync(folderPath)) {
-      fs.mkdirSync(folderPath, { recursive: true });
-      console.log(`Directory ${folder} created at ${folderPath}`);
-    }
+});
+
+const createWindow = () => {
+  // Utiliser le thread principal pour toute création de fenêtre
+  app.whenReady().then(() => {
+    const primaryDisplay = screen.getPrimaryDisplay();
+    const { width, height } = primaryDisplay.workAreaSize;
+    
+    mainWindow = new BrowserWindow({
+      icon: path.join(__dirname, "./assets/icon/logo.png"),
+      autoHideMenuBar: true,
+      title: `${package.name} ${package.version}`,
+      width: Math.min(1200, width * 0.8),
+      height: Math.min(700, height * 0.8),
+      fullscreenable: true,
+      maximizable: true,
+      movable: true,
+      resizable: true,
+      show: false, // Cacher la fenêtre jusqu'à ce qu'elle soit prête
+      webPreferences: {
+        nodeIntegration: true,
+        devTools: true,
+        nodeIntegrationInWorker: true,
+        enableRemoteModule: true,
+        webSecurity: true,
+        contextIsolation: false,
+      }
+    });
+
+    // Attendre que la fenêtre soit prête avant de l'afficher
+    mainWindow.once('ready-to-show', () => {
+      mainWindow.show();
+    });
+
+    mainWindow.loadFile("./html/login.html");
+    
+    // Capturer les erreurs de rendu
+    mainWindow.webContents.on('render-process-gone', (event, details) => {
+      log.error('Processus de rendu terminé:', details);
+      if (details.reason !== 'clean-exit') {
+        createWindow(); // Recréer la fenêtre en cas de crash
+      }
+    });
   });
 };
 
-// Configurer les paramètres macOS spécifiques pour LWJGL
-const setupMacOSSpecificSettings = () => {
-  if (process.platform !== 'darwin') return;
-  
-  // Créer un script pour configurer les paramètres système nécessaires
-  const macFixScript = `
-  osascript -e '
-  do shell script "defaults write org.lwjgl.opengl.Display NSRequiresAquaSystemAppearance -bool YES"
-  do shell script "defaults write org.lwjgl.opengl.Window NSRequiresAquaSystemAppearance -bool YES"
-  do shell script "defaults write com.apple.CrashReporter DialogType none"
-  '
-  `;
-  
-  exec(macFixScript, (error) => {
-    if (error) console.error('Erreur lors de la configuration macOS:', error);
-    else console.log('Configuration macOS pour LWJGL appliquée');
-  });
-};
-
-// Initialisation de l'application
-app.whenReady().then(async () => {
-  // Configurer les répertoires et paramètres spécifiques
-  setupDirectories();
-  
-  if (process.platform === 'darwin') {
-    setupMacOSSpecificSettings();
-  }
-  
-  // Démarrer le serveur express
+app.whenReady().then(() => {
   const server = http.createServer(expressapp);
   server.on("error", err => {
-    if (err.code === "EADDRINUSE") {
-      console.log("Port déjà utilisé, fermeture de l'application...");
+    if (err.code == "EADDRINUSE") {
+      log.error("Port déjà utilisé:", err);
       return app.quit();
     }
   });
 
-  // Lancement du serveur et création de la fenêtre
+  const directoryPath = dataPath;
+  log.info(`Chemin des données: ${directoryPath}`);
+  
+  // Créer les répertoires nécessaires
+  const createDirectoryIfNeeded = (dir, name) => {
+    if (!fs.existsSync(dir)) {
+      try {
+        fs.mkdirSync(dir, { recursive: true });
+        log.info(`Répertoire ${name} créé à ${dir}`);
+      } catch (err) {
+        log.error(`Erreur lors de la création du répertoire ${name}:`, err);
+      }
+    } else {
+      log.info(`Répertoire ${name} existe déjà à ${dir}`);
+    }
+  };
+  
+  createDirectoryIfNeeded(directoryPath, ".neoearth-mc");
+  createDirectoryIfNeeded(path.join(directoryPath, 'mods'), "mods");
+  
+  // Ajout des répertoires pour macOS
+  if (process.platform === 'darwin') {
+    createDirectoryIfNeeded(path.join(directoryPath, 'natives'), "natives");
+  }
+
   server.listen(4850, async () => {
-    await createWindow();
+    createWindow();
     
-    // Configuration de l'icône tray
-    const trayIcon = path.join(__dirname, "./assets/icon/logo.png");
-    
-    // Création du tray dans un bloc sécurisé
-    try {
-      tray = new Tray(trayIcon);
+    if (mainWindow) {
+      app.on('activate', () => {
+        // Sur macOS, il est courant de re-créer une fenêtre dans l'application quand
+        // l'icône du dock est cliquée et qu'il n'y a pas d'autres fenêtres ouvertes.
+        if (BrowserWindow.getAllWindows().length === 0) createWindow();
+      });
+      
+      // Créer le tray icon
+      tray = new Tray(path.join(__dirname, "./assets/icon/logo.png"));
       const contextMenu = Menu.buildFromTemplate([
         {
           label: "NeoEarth-MC",
           icon: path.join(__dirname, "./assets/icon/logo16x16.png"),
           enabled: false
         },
-        { type: 'separator' },
+        {
+          type: 'separator'
+        },
         {
           label: 'Afficher',
-          click: async () => {
-            if (!mainWindow) return;
-            
-            if (process.platform === 'darwin') {
-              await runMacOSThreadFix();
-              setTimeout(() => {
-                mainWindow.show();
-                app.focus({ steal: true });
-              }, 0);
-            } else {
+          click: () => {
+            // S'assurer que ces actions se font sur le thread principal
+            app.focus();
+            if (mainWindow) {
               mainWindow.show();
               mainWindow.focus();
             }
@@ -211,232 +148,157 @@ app.whenReady().then(async () => {
           }
         }
       ]);
-      
       tray.setToolTip('NeoEarth-MC');
       tray.setContextMenu(contextMenu);
-  
-      tray.on('click', async () => {
-        if (!mainWindow) return;
-        
-        if (process.platform === 'darwin') {
-          await runMacOSThreadFix();
-          setTimeout(() => {
-            mainWindow.show();
-            app.focus({ steal: true });
-          }, 0);
-        } else {
+
+      tray.on('click', () => {
+        app.focus();
+        if (mainWindow) {
           mainWindow.show();
           mainWindow.focus();
         }
       });
-    } catch (error) {
-      console.error("Erreur lors de la création du tray:", error);
+    }
+  });
+
+  // Gestionnaires d'événements IPC
+  ipcMain.on("quit", () => {
+    log.info("Application fermée par l'utilisateur.");
+    app.quit();
+  });
+
+  ipcMain.on("minimize", () => {
+    if (mainWindow) {
+      mainWindow.minimize();
+    }
+  });
+
+  ipcMain.on("maximize", () => {
+    if (mainWindow) {
+      if (mainWindow.isMaximized()) {
+        mainWindow.restore();
+      } else {
+        mainWindow.maximize();
+      }
+    }
+  });
+
+  ipcMain.on("login", () => {
+    if (mainWindow) {
+      mainWindow.loadFile("./html/login.html");
+    }
+  });
+
+  ipcMain.on("maintenance", () => {
+    if (mainWindow) {
+      mainWindow.loadFile("./html/error/maintenance.html");
+    }
+  });
+
+  ipcMain.on("hide", () => {
+    if (mainWindow) {
+      mainWindow.hide();
+    }
+  });
+
+  ipcMain.on("update", () => {
+    if (mainWindow) {
+      mainWindow.setTitle(`${package.name} ${package.version} - Mise à Jour Disponible`);
+      mainWindow.loadFile("./html/update.html");
+    }
+  });
+
+  ipcMain.on("main", () => {
+    if (mainWindow) {
+      // Exécuter sur le thread principal
+      mainWindow.setTitle(`${package.name} ${package.version}`);
+      // Utiliser setBounds au lieu de setSize pour macOS
+      const bounds = mainWindow.getBounds();
+      mainWindow.setBounds({ 
+        x: bounds.x, 
+        y: bounds.y, 
+        width: 1200, 
+        height: 700 
+      });
+      mainWindow.loadFile("./html/index.html");
+      
+      // Configuration Discord RPC
+      try {
+        const RPC = require("discord-rpc");
+        const rpc = new RPC.Client({ transport: 'ipc' });
+        rpc.on("ready", () => {
+          log.info("Rich Presence configuré avec succès");
+          rpc.setActivity({
+            largeImageKey: "https://cdn.discordapp.com/emojis/1217490756688936980.png",
+            largeImageText: "NeoEarth-MC",
+            smallImageKey: `https://www.neoearth-mc.fr/api/skin-api/avatars/face/${store.get("username")}.png`,
+            smallImageText: `${store.get("username")}`,
+            state: "⚒️ Gère une nation",
+            details: "🎮 Actuellement sur NeoEarth-MC",
+            startTimestamp: new Date(),
+            buttons: [
+              {
+                label: 'Discord',
+                url: 'https://discord.gg/NRrwNm39G8'
+              },
+              {
+                label: 'Site Web',
+                url: 'https://www.neoearth-mc.fr'
+              }
+            ]
+          });
+        });
+
+        rpc.login({ clientId: "1216094434899263568" }).catch(err => {
+          log.error("Erreur Discord RPC:", err);
+        });
+      } catch (error) {
+        log.error("Erreur lors de l'initialisation de Discord RPC:", error);
+      }
     }
   });
 });
 
-// Gestionnaires IPC
-
-// Quitter l'application
-ipcMain.on("quit", () => {
-  console.info(["LOG"], "Application Closed.");
-  app.quit();
-});
-
-// Minimiser la fenêtre en toute sécurité
-ipcMain.on("minimize", async () => {
-  if (!mainWindow) return;
-  
-  if (process.platform === 'darwin') {
-    // Exécuter le fix thread avant de minimiser
-    await runMacOSThreadFix();
-    setTimeout(() => {
-      mainWindow.minimize();
-    }, 0);
-  } else {
-    mainWindow.minimize();
-  }
-});
-
-// Maximiser ou restaurer la fenêtre en toute sécurité
-ipcMain.on("maximize", async () => {
-  if (!mainWindow) return;
-  
-  if (process.platform === 'darwin') {
-    // Exécuter le fix thread avant de maximiser/restaurer
-    await runMacOSThreadFix();
-    setTimeout(() => {
-      if (mainWindow.isMaximized()) {
-        mainWindow.unmaximize();
-      } else {
-        mainWindow.maximize();
-      }
-    }, 0);
-  } else {
-    if (mainWindow.isMaximized()) {
-      mainWindow.unmaximize();
-    } else {
-      mainWindow.maximize();
-    }
-  }
-});
-
-// Charger la page de login
-ipcMain.on("login", () => {
-  if (mainWindow) {
-    mainWindow.loadFile("./html/login.html");
-  }
-});
-
-// Afficher la page de maintenance
-ipcMain.on("maintenance", (err, message) => {
-  if (mainWindow) {
-    mainWindow.loadFile("./html/error/maintenance.html");
-  }
-});
-
-// Cacher la fenêtre
-ipcMain.on("hide", () => {
-  if (mainWindow) {
-    mainWindow.hide();
-  }
-});
-
-// Afficher la page de mise à jour
-ipcMain.on("update", () => {
-  if (mainWindow) {
-    mainWindow.setTitle(`${package.name} ${package.version} - Mise à Jour Disponible`);
-    mainWindow.loadFile("./html/update.html");
-  }
-});
-
-// Charger la page principale avec sécurité pour macOS
-ipcMain.on("main", async () => {
-  if (!mainWindow) return;
-  
-  if (process.platform === 'darwin') {
-    // Exécuter le fix thread avant les modifications de la fenêtre
-    await runMacOSThreadFix();
-    
-    // Utiliser setTimeout pour s'assurer que les opérations sont sur le thread principal
-    setTimeout(() => {
-      mainWindow.setTitle(`${package.name} ${package.version}`);
-      mainWindow.setSize(1200, 700, false);
-      mainWindow.loadFile("./html/index.html");
-    }, 100);
-  } else {
-    // Comportement normal pour Windows
-    mainWindow.setTitle(`${package.name} ${package.version}`);
-    mainWindow.setSize(1200, 700);
-    mainWindow.loadFile("./html/index.html");
-  }
-
-  // Configuration de Discord Rich Presence
-  try {
-    const RPC = require("discord-rpc");
-    const rpc = new RPC.Client({ transport: 'ipc' });
-    rpc.on("ready", () => {
-      console.log("Rich Presence set!");
-      rpc.setActivity({
-        largeImageKey: "https://cdn.discordapp.com/emojis/1217490756688936980.png",
-        largeImageText: "NeoEarth-MC",
-        smallImageKey: `https://www.neoearth-mc.fr/api/skin-api/avatars/face/${store.get("username")}.png`,
-        smallImageText: `${store.get("username")}`,
-        state: "⚒️ Gère une nation",
-        details: "🎮 Actuellement sur NeoEarth-MC",
-        startTimestamp: new Date(),
-        buttons: [
-          {
-            label: 'Discord',
-            url: 'https://discord.gg/NRrwNm39G8'
-          },
-          {
-            label: 'Site Web',
-            url: 'https://www.neoearth-mc.fr'
-          }
-        ]
-      });
-    });
-
-    rpc.login({ clientId: "1216094434899263568" }).catch(console.error);
-  } catch (error) {
-    console.error("Erreur lors de la configuration de Discord RPC:", error);
-  }
-});
-
-// Gestion des logs
 ipcMain.on("log", (err, text) => {
   log.info(["LOG"], text);
 });
 
-// Gestion sécurisée des dialogues de sélection de fichier
 ipcMain.on("openDialogFile", async (event, location) => {
-  // Fonction commune pour traiter le résultat
-  const processDialogResult = (result) => {
-    if (!result.filePaths || result.filePaths.length === 0) return;
+  try {
+    const result = await dialog.showOpenDialog({
+      properties: ['openFile'],
+    });
     
-    for (let i = 0; i < result.filePaths.length; i++) {
-      const fileName = path.basename(result.filePaths[i]);
-      const destinationPath = path.join(dataPath, location, fileName);
-      
-      try {
-        fs.copyFileSync(result.filePaths[i], destinationPath);
+    if (!result.canceled && result.filePaths.length > 0) {
+      for (let i = 0; i < result.filePaths.length; i++) {
+        const fileName = path.basename(result.filePaths[i]);
+        const destinationPath = path.join(dataPath, location, fileName);
         
-        let settingsLocation = location;
-        if (location === "resourcepacks") {
-          settingsLocation = "SettingsSrcPack";
-        } else {
-          settingsLocation = "SettingsShaders";
-        }
-        
-        event.sender.send('update-file-list', { 
-          path: settingsLocation, 
-          fileName: fileName 
+        fs.copyFile(result.filePaths[i], destinationPath, (err) => {
+          if (err) {
+            log.error(`Erreur lors de la copie du fichier ${fileName}:`, err);
+            return;
+          }
+          
+          let settingsPath = location;
+          if (location === "resourcepacks") {
+            settingsPath = "SettingsSrcPack";
+          } else {
+            settingsPath = "SettingsShaders";
+          }
+          
+          event.sender.send('update-file-list', { path: settingsPath, fileName: fileName });
         });
-      } catch (error) {
-        console.error(`Erreur copie fichier ${fileName}:`, error);
       }
     }
-  };
-  
-  // Méthode sécurisée pour ouvrir un dialogue
-  const openDialogSafely = async () => {
-    try {
-      const result = await dialog.showOpenDialog({
-        properties: ['openFile'],
-      });
-      processDialogResult(result);
-    } catch (error) {
-      console.error("Erreur dialog:", error);
-    }
-  };
-  
-  if (process.platform === 'darwin') {
-    // Pour macOS, exécuter le fix thread et utiliser setTimeout
-    await runMacOSThreadFix();
-    setTimeout(openDialogSafely, 0);
-  } else {
-    // Pour Windows, comportement normal
-    await openDialogSafely();
+  } catch (error) {
+    log.error("Erreur lors de l'ouverture du dialogue de fichiers:", error);
   }
 });
 
-// Gestion spéciale pour macOS
-if (process.platform === 'darwin') {
-  // Réactiver l'application quand on clique sur l'icône du Dock
-  app.on('activate', async () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      await createWindow();
-    }
-  });
-
-  // Empêcher l'application de quitter quand toutes les fenêtres sont fermées
-  app.on('window-all-closed', () => {
-    // Ne rien faire, on ne quitte pas l'application sur macOS quand on ferme la fenêtre
-  });
-} else {
-  // Pour toutes les autres plateformes, quitter l'application quand toutes les fenêtres sont fermées
-  app.on('window-all-closed', () => {
+// Prévenir la fermeture de l'application quand toutes les fenêtres sont fermées (important pour macOS)
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
     app.quit();
-  });
-}
+  }
+});
