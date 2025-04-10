@@ -1,13 +1,21 @@
-const { ipcRenderer, shell, dialog } = require("electron");
-const Store = require("electron-store");
+const { ipcRenderer, shell } = require('electron');
+const Store = require('electron-store');
+const path = require('path');
+const fs = require('fs');
 const store = new Store();
-const os = require("os");
-const path = require("path");
-const fs = require("fs");
 const Downloader = require("nodejs-file-downloader");
-const dataPath = path.join(app.getPath('userData'), ".neoearth-mc");
+const os = require('os');
 
-// Définition des identifiants des différents menus pour simplifier la navigation
+let dataPath;
+
+if (process.platform === "win32" || process.platform === "win64") {
+  dataPath = path.join(process.env.APPDATA, ".neoearth-mc");
+} else if (process.platform === "darwin") {
+  dataPath = path.join(os.homedir(), "Library", "Application Support", ".neoearth-mc");
+} else if (process.platform === "linux") {
+  dataPath = path.join(os.homedir(), ".config", ".neoearth-mc");
+}
+
 const MENUS = {
   PROFILE: "ProfilAccount",
   RAM: "SettingsRam",
@@ -17,15 +25,11 @@ const MENUS = {
   SHADERS: "SettingsShaders"
 };
 
-// Variable pour suivre le menu actif
 let activeMenu = null;
 
-// Fonction pour changer de menu sans avoir à fermer puis réouvrir
 function switchMenu(menuId) {
-  // Affiche le conteneur principal s'il n'est pas déjà affiché
   document.getElementById("menu").style.display = "block";
 
-  // Cache tous les menus
   document.getElementById("ProfilAccount").style.display = "none";
   document.getElementById("SettingsRam").style.display = "none";
   document.getElementById("SettingsModsAddionnel").style.display = "none";
@@ -33,10 +37,8 @@ function switchMenu(menuId) {
   document.getElementById("SettingsSrcPack").style.display = "none";
   document.getElementById("SettingsShaders").style.display = "none";
 
-  // Affiche le menu demandé
   document.getElementById(menuId).style.display = "inherit";
 
-  // Met à jour le menu actif
   activeMenu = menuId;
 }
 
@@ -47,18 +49,12 @@ document.getElementById("rules").addEventListener("click", (event) => {
 document.getElementById("radio").addEventListener("click", (event) => {
   shell.openExternal("https://radio.neoearth-mc.fr")
 })
-document.getElementById("disconnect1").addEventListener("click", () => {
-  store.clear();
-  ipcRenderer.send("login");
-})
 
 document.getElementById("ram").addEventListener("click", () => {
-  // Si on clique sur le menu actif, on ferme tout
   if(activeMenu === MENUS.RAM && document.getElementById("menu").style.display === "block") {
     document.getElementById("menu").style.display = "none";
     activeMenu = null;
   } else {
-    // Sinon, on passe au menu RAM
     switchMenu(MENUS.RAM);
   }
 })
@@ -128,14 +124,12 @@ function handleCheckboxChange(event) {
 }
 
 async function initializeMods() {
-  // Si on clique sur le menu actif, on ferme tout
   if(activeMenu === MENUS.MODS && document.getElementById("menu").style.display === "block") {
     document.getElementById("menu").style.display = "none";
     activeMenu = null;
     return;
   }
 
-  // Sinon, on passe au menu MODS
   switchMenu(MENUS.MODS);
 
   let catThreeDiv = document.getElementById("SettingsModsAddionnel");
@@ -144,7 +138,6 @@ async function initializeMods() {
     catThreeDiv.removeChild(child.nextElementSibling);
   }
 
-  // Créer un conteneur pour les mods avec une meilleure présentation
   const modContainer = document.createElement("div");
   modContainer.className = "mods-list";
   modContainer.style.cssText = "margin-top: 15px;";
@@ -154,23 +147,20 @@ async function initializeMods() {
   const data = await response.json();
 
   for (let i = 0; i < data.files.length; i++) {
-    // Créer un conteneur pour chaque mod
     const modRow = document.createElement("div");
     modRow.style.cssText = "display: flex; align-items: center; margin-bottom: 8px;";
 
-    // Créer la checkbox (à gauche maintenant)
     let input = document.createElement("input");
     input.type = "checkbox";
     input.id = `mod-${data.files[i].name}`;
     input.style.cssText = "margin-right: 10px;";
 
-    // Créer le label avec le nom du mod
     let label = document.createElement("label");
-    label.htmlFor = input.id; // Association avec l'input
+    label.htmlFor = input.id;
     label.textContent = data.files[i].name;
     label.style.cssText = "color: #fff; font-size: 14px;";
 
-    // Ajouter les éléments dans l'ordre: input (checkbox) puis label
+
     modRow.appendChild(input);
     modRow.appendChild(label);
     modContainer.appendChild(modRow);
@@ -193,7 +183,6 @@ document.getElementById("copyFileButton1").addEventListener("click", async (even
 })
 
 document.getElementById("ressources-pack").addEventListener("click", () => {
-  // Si on clique sur le menu actif, on ferme tout
   if(activeMenu === MENUS.RESOURCEPACKS && document.getElementById("menu").style.display === "block") {
     document.getElementById("menu").style.display = "none";
     activeMenu = null;
@@ -327,3 +316,8 @@ document.getElementById("RamMax").addEventListener("change", function () {
   var selectedValue = this.value;
   store.set("ramSettings", { ramMin: `${store.get("ramSettings").ramMin}`, ramMax: `${selectedValue}G` })
 })
+
+document.getElementById("disconnect").addEventListener("click", () => {
+  store.clear();
+  ipcRenderer.send("login");
+});

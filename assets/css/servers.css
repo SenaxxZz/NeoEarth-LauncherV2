@@ -1,4 +1,4 @@
-/* Base Styles */
+/* Base Styles - Simplified */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -18,7 +18,7 @@ body {
     color: #fff;
 }
 
-/* Overlay avec dégradé sombre */
+/* Overlay with dark gradient */
 body::before {
     content: '';
     position: fixed;
@@ -31,7 +31,7 @@ body::before {
     z-index: -1;
 }
 
-/* Animations */
+/* Essential Animations */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-15px); }
     to { opacity: 1; transform: translateY(0); }
@@ -42,13 +42,7 @@ body::before {
     to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.03); }
-    100% { transform: scale(1); }
-}
-
-/* === LEFT SIDEBAR === */
+/* LEFT SIDEBAR - Optimized */
 .navbar-left {
     position: fixed;
     left: 0;
@@ -63,7 +57,7 @@ body::before {
     flex-direction: column;
 }
 
-/* Logo en haut de la sidebar */
+/* Logo positioning improved */
 .navbar-left:before {
     content: '';
     position: absolute;
@@ -77,7 +71,7 @@ body::before {
     z-index: 10;
 }
 
-/* Navigation */
+/* Navigation structure */
 nav {
     height: 100%;
     width: 100%;
@@ -94,7 +88,8 @@ nav ul {
     padding: 0;
     margin-top: 5rem;
     list-style: none;
-    flex: 1;
+    height: calc(100% - 3.5rem); /* Leave space for disconnect button */
+    position: relative;
 }
 
 nav li {
@@ -129,7 +124,7 @@ nav li:hover a {
     color: #2ecc71;
 }
 
-/* Bouton déconnexion */
+/* Disconnect button - Fixed to bottom */
 #disconnect, 
 .disconnect,
 li#disconnect,
@@ -148,19 +143,34 @@ li.disconnect {
     z-index: 200 !important;
 }
 
-#disconnect:hover, 
-.disconnect:hover,
-li#disconnect:hover,
-li.disconnect:hover {
-    background-color: rgba(255, 0, 0, 0.2) !important;
-    color: #ff6666 !important;
+#disconnect, 
+.disconnect,
+li#disconnect,
+li.disconnect {
+    position: fixed !important; /* Changed from absolute to fixed */
+    bottom: 0 !important;
+    left: 0 !important;
+    width: 5rem !important; /* Match sidebar width exactly */
+    height: 3.5rem !important; /* Set explicit height */
+    margin: 0 !important;
+    padding: 1rem 0 !important; /* Slightly increased padding */
+    color: #ff4646 !important;
+    cursor: pointer !important;
+    border-top: 1px solid rgba(255, 70, 70, 0.2) !important;
+    background-color: rgba(255, 0, 0, 0.1) !important;
+    text-align: center !important;
+    z-index: 250 !important; /* Increased z-index to ensure visibility */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
+/* Ensure the last menu item has proper spacing before disconnect */
 nav ul li:last-of-type:not(#disconnect):not(.disconnect) {
-    margin-bottom: 3rem;
+    margin-bottom: 4.5rem; /* Increased margin to ensure no overlap */
 }
 
-/* Container principal */
+/* Main container */
 .container {
     position: relative;
     margin-left: 5rem;
@@ -169,16 +179,42 @@ nav ul li:last-of-type:not(#disconnect):not(.disconnect) {
     overflow: hidden;
 }
 
-/* Cards Container */
+/* Cards Container - Optimized for servers */
 .cards-container {
     overflow-x: auto;
+    overflow-y: hidden;
+    margin: 1.5rem 0 2.5rem;
+    padding: 1.2rem;
     display: flex;
     flex-wrap: nowrap;
     gap: 1.5rem;
-    padding: 1rem;
+    width: calc(100% - 1rem);
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+    z-index: 20;
+    
+    /* Custom scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(46, 204, 113, 0.5) rgba(30, 30, 30, 0.3);
 }
 
-/* Card Design */
+.cards-container::-webkit-scrollbar {
+    height: 6px;
+    background: rgba(30, 30, 30, 0.3);
+    border-radius: 3px;
+}
+
+.cards-container::-webkit-scrollbar-thumb {
+    background: linear-gradient(to right, #27ae60, #2ecc71);
+    border-radius: 3px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.cards-container::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to right, #2ecc71, #3ee896);
+}
+
+/* Server Card Styles */
 .card-news {
     background: linear-gradient(135deg, rgba(30, 30, 30, 0.95), rgba(20, 20, 20, 0.95));
     border-radius: 15px;
@@ -190,6 +226,14 @@ nav ul li:last-of-type:not(#disconnect):not(.disconnect) {
     min-width: 300px;
     max-width: 350px;
     flex: 0 0 auto;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    animation: fadeInUp 0.6s ease;
+}
+
+.card-news:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.7),
+                0 0 20px rgba(46, 204, 113, 0.4);
 }
 
 .card-news h1 {
@@ -200,44 +244,38 @@ nav ul li:last-of-type:not(#disconnect):not(.disconnect) {
     color: white;
 }
 
-.card-news p {
-    padding: 0 15px 15px;
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 14px;
-}
-
-.iframe-container {
-    position: relative;
-    height: 160px;
-    overflow: hidden;
-    margin: 15px;
-}
-
-.iframe-container img {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    max-width: 100%;
-    max-height: 100%;
-    border-radius: 8px;
-}
-
+/* Logo positioning improved for server display */
 .logo-text {
     position: fixed;
-    top: 20px;
-    left: 80px; /* À droite de la barre latérale */
+    top: 1.5rem; /* Positioned slightly higher */
+    left: 6.5rem; /* Closer to sidebar */
     height: auto;
-    max-width: 200px;
+    max-width: 150px; /* Reduced from 180px for better scaling */
     z-index: 200;
+    transform-origin: left center; /* Scale from left side */
 }
 
 .logo-text img {
     max-width: 100%;
     height: auto;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+    transition: all 0.3s ease;
+    opacity: 0.9; /* Slightly less prominent */
 }
 
-/* Utility */
+.logo-text img:hover {
+    transform: scale(1.05);
+    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.6)) brightness(1.1);
+    opacity: 1;
+}
+
+img {
+    width: 200px;
+    height: 200px;
+    display: block;
+    margin: 0 auto;
+}
+
 .hidden {
     display: none !important;
 }
