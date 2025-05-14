@@ -1,4 +1,3 @@
-/* Base Styles - Simplified */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -18,7 +17,6 @@ body {
     color: #fff;
 }
 
-/* Overlay with dark gradient */
 body::before {
     content: '';
     position: fixed;
@@ -31,7 +29,6 @@ body::before {
     z-index: -1;
 }
 
-/* Essential Animations */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-15px); }
     to { opacity: 1; transform: translateY(0); }
@@ -42,7 +39,11 @@ body::before {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* LEFT SIDEBAR - Optimized */
+@keyframes edgePulse {
+    0% { box-shadow: 0 0 5px rgba(231, 76, 60, 0.5); }
+    100% { box-shadow: 0 0 15px rgba(231, 76, 60, 0.8); }
+}
+
 .navbar-left {
     position: fixed;
     left: 0;
@@ -57,8 +58,8 @@ body::before {
     flex-direction: column;
 }
 
-/* Logo positioning improved */
 .navbar-left:before {
+    display: block; 
     content: '';
     position: absolute;
     top: 1rem;
@@ -68,10 +69,16 @@ body::before {
     height: 3rem;
     background: url("../icon/logo.png") no-repeat center center;
     background-size: contain;
+    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.5));
+    transition: all 0.3s ease;
     z-index: 10;
 }
 
-/* Navigation structure */
+.navbar-left:hover:before {
+    transform: translateX(-50%) scale(1.1);
+    filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.6)) brightness(1.1);
+}
+
 nav {
     height: 100%;
     width: 100%;
@@ -88,7 +95,7 @@ nav ul {
     padding: 0;
     margin-top: 5rem;
     list-style: none;
-    height: calc(100% - 3.5rem); /* Leave space for disconnect button */
+    height: calc(100% - 3.5rem);
     position: relative;
 }
 
@@ -100,6 +107,8 @@ nav li {
     text-align: center;
     position: relative;
     font-size: 1.3rem;
+    transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+    overflow: hidden;
 }
 
 nav a {
@@ -107,12 +116,30 @@ nav a {
     color: rgba(255, 255, 255, 0.7);
     display: block;
     width: 100%;
+    transition: all 0.3s ease;
 }
 
 nav li i {
     font-size: 1.3rem;
     color: rgba(255, 255, 255, 0.7);
     cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+nav li::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 0;
+    background: linear-gradient(to top, rgba(46, 204, 113, 0.1), transparent);
+    transition: all 0.3s ease;
+    z-index: -1;
+}
+
+nav li:hover::after {
+    height: 100%;
 }
 
 nav li:hover {
@@ -122,55 +149,79 @@ nav li:hover {
 nav li:hover i,
 nav li:hover a {
     color: #2ecc71;
-}
-
-/* Disconnect button - Fixed to bottom */
-#disconnect, 
-.disconnect,
-li#disconnect,
-li.disconnect {
-    position: absolute !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
-    margin: 0 !important;
-    color: #ff4646 !important;
-    cursor: pointer !important;
-    padding: 0.8rem 0 !important;
-    border-top: 1px solid rgba(255, 70, 70, 0.2) !important;
-    background-color: rgba(255, 0, 0, 0.1) !important;
-    text-align: center !important;
-    z-index: 200 !important;
+    transform: translateY(-2px);
+    text-shadow: 0 0 12px rgba(46, 204, 113, 0.5);
 }
 
 #disconnect, 
 .disconnect,
 li#disconnect,
 li.disconnect {
-    position: fixed !important; /* Changed from absolute to fixed */
+    margin-top: auto !important;
+    position: fixed !important;
     bottom: 0 !important;
     left: 0 !important;
-    width: 5rem !important; /* Match sidebar width exactly */
-    height: 3.5rem !important; /* Set explicit height */
+    width: 5rem !important;
+    height: 3.5rem !important;
     margin: 0 !important;
-    padding: 1rem 0 !important; /* Slightly increased padding */
-    color: #ff4646 !important;
+    padding: 1rem 0 !important;
+    color: rgba(255, 120, 120, 0.8) !important;
     cursor: pointer !important;
-    border-top: 1px solid rgba(255, 70, 70, 0.2) !important;
-    background-color: rgba(255, 0, 0, 0.1) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+    background-color: transparent !important;
     text-align: center !important;
-    z-index: 250 !important; /* Increased z-index to ensure visibility */
+    z-index: 250 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
 }
 
-/* Ensure the last menu item has proper spacing before disconnect */
-nav ul li:last-of-type:not(#disconnect):not(.disconnect) {
-    margin-bottom: 4.5rem; /* Increased margin to ensure no overlap */
+#disconnect::after, 
+.disconnect::after,
+li#disconnect::after,
+li.disconnect::after {
+    content: '' !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 3px !important;
+    height: 0 !important;
+    background: linear-gradient(to bottom, #e74c3c, #c0392b) !important;
+    transition: height 0.3s ease, box-shadow 0.3s ease !important;
+    border-radius: 0 3px 3px 0 !important;
+    z-index: 1 !important;
 }
 
-/* Main container */
+#disconnect:hover, 
+.disconnect:hover,
+li#disconnect:hover,
+li.disconnect:hover {
+    background-color: rgba(255, 120, 120, 0.15) !important;
+}
+
+#disconnect:hover::after, 
+.disconnect:hover::after,
+li#disconnect:hover::after,
+li.disconnect:hover::after {
+    height: 70% !important;
+    box-shadow: 0 0 10px rgba(231, 76, 60, 0.7) !important;
+    animation: edgePulse 1.5s infinite alternate !important;
+}
+
+#disconnect:hover i, 
+.disconnect:hover i,
+li#disconnect:hover i,
+li.disconnect:hover i {
+    color: #e74c3c !important;
+    text-shadow: 0 0 12px rgba(231, 76, 60, 0.5) !important;
+    transform: translateY(-2px) !important;
+}
+
+nav ul li:last-of-type:not(#disconnect):not(.disconnect) {
+    margin-bottom: 4.5rem;
+}
+
 .container {
     position: relative;
     margin-left: 5rem;
@@ -179,7 +230,6 @@ nav ul li:last-of-type:not(#disconnect):not(.disconnect) {
     overflow: hidden;
 }
 
-/* Cards Container - Optimized for servers */
 .cards-container {
     overflow-x: auto;
     overflow-y: hidden;
@@ -193,7 +243,6 @@ nav ul li:last-of-type:not(#disconnect):not(.disconnect) {
     position: relative;
     z-index: 20;
     
-    /* Custom scrollbar */
     scrollbar-width: thin;
     scrollbar-color: rgba(46, 204, 113, 0.5) rgba(30, 30, 30, 0.3);
 }
@@ -214,7 +263,6 @@ nav ul li:last-of-type:not(#disconnect):not(.disconnect) {
     background: linear-gradient(to right, #2ecc71, #3ee896);
 }
 
-/* Server Card Styles */
 .card-news {
     background: linear-gradient(135deg, rgba(30, 30, 30, 0.95), rgba(20, 20, 20, 0.95));
     border-radius: 15px;
@@ -244,15 +292,14 @@ nav ul li:last-of-type:not(#disconnect):not(.disconnect) {
     color: white;
 }
 
-/* Logo positioning improved for server display */
 .logo-text {
     position: fixed;
-    top: 1.5rem; /* Positioned slightly higher */
-    left: 6.5rem; /* Closer to sidebar */
+    top: 1.5rem;
+    left: 6.5rem;
     height: auto;
-    max-width: 150px; /* Reduced from 180px for better scaling */
+    max-width: 150px;
     z-index: 200;
-    transform-origin: left center; /* Scale from left side */
+    transform-origin: left center;
 }
 
 .logo-text img {
@@ -260,7 +307,7 @@ nav ul li:last-of-type:not(#disconnect):not(.disconnect) {
     height: auto;
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
     transition: all 0.3s ease;
-    opacity: 0.9; /* Slightly less prominent */
+    opacity: 0.9;
 }
 
 .logo-text img:hover {
@@ -279,3 +326,43 @@ img {
 .hidden {
     display: none !important;
 }
+
+/* Window Controls */
+.navbar-right-section {
+    display: flex;
+    align-items: center;
+    margin-right: 0.5rem;
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 1rem;
+  }
+  
+  .navbar-icon {
+    font-size: 24px;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    margin: 0 0.5rem;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  
+  .window-control {
+    font-size: 20px;
+    margin-left: 1rem;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  
+  #minimize:hover {
+    color: #f1c40f;
+    text-shadow: 0 0 10px rgba(241, 196, 15, 0.6);
+  }
+  
+  #maximize:hover {
+    color: #3498db;
+    text-shadow: 0 0 10px rgba(52, 152, 219, 0.6);
+  }
+  
+  #close:hover {
+    color: #e74c3c;
+    text-shadow: 0 0 10px rgba(231, 76, 60, 0.6);
+  }

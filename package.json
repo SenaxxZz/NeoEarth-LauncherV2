@@ -1,15 +1,14 @@
 {
   "name": "NeoEarth-MC",
-  "version": "1.0.3",
-  "publicVersion": "1.0.3",
-  "description": "Official Launcher",
+  "version": "1.0.4",
+  "publicVersion": "1.0.4",
+  "description": "Launcher officiel",
   "main": "Main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
-    "build:win": "electron-builder --windows --config",
-    "build:mac": "electron-builder --mac --config",
-    "build:mac-x64": "electron-builder --mac --x64 --config"
+    "win": "electron-builder --windows",
+    "mac": "electron-builder --mac"
   },
   "keywords": [],
   "author": "NeoEarth-MC",
@@ -39,7 +38,10 @@
     },
     "mac": {
       "icon": "./assets/icon/logo.png",
-      "target": ["dmg", "zip"],
+      "target": [
+        "dmg",
+        "zip"
+      ],
       "category": "public.app-category.games"
     },
     "nsis": {
@@ -50,7 +52,7 @@
       "uninstallDisplayName": "NeoEarth-MC",
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "NeoEarth"
+      "shortcutName": "NeoEarth-MC"
     }
   }
 }

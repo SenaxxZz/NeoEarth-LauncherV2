@@ -16,6 +16,20 @@ if (process.platform === "win32" || process.platform === "win64") {
   dataPath = path.join(os.homedir(), ".config", ".neoearth-mc");
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById("close")?.addEventListener("click", () => {
+    ipcRenderer.send("quit");
+  });
+
+  document.getElementById("minimize")?.addEventListener("click", () => {
+    ipcRenderer.send("minimize");
+  });
+
+  document.getElementById("maximize")?.addEventListener("click", () => {
+    ipcRenderer.send("maximize");
+  });
+});
+
 const MENUS = {
   PROFILE: "ProfilAccount",
   RAM: "SettingsRam",

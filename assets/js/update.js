@@ -21,3 +21,17 @@ const store = new Store();
     return ipcRenderer.send("update");
   }
 })();
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById("close")?.addEventListener("click", () => {
+    ipcRenderer.send("quit");
+  });
+
+  document.getElementById("minimize")?.addEventListener("click", () => {
+    ipcRenderer.send("minimize");
+  });
+
+  document.getElementById("maximize")?.addEventListener("click", () => {
+    ipcRenderer.send("maximize");
+  });
+});

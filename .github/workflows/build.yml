@@ -1,56 +1,61 @@
-name: Build NeoEarth
+name: Build Application
 
 on:
   push:
-    tags: [ 'v*.*.*' ]
-  workflow_dispatch:
+    branches: [ main, master ]
+    tags: [ 'v*' ]  # Se déclenche sur les tags commençant par v (ex: v1.0.0)
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:  # Permet de déclencher manuellement
 
 jobs:
   build:
     strategy:
       matrix:
         os: [windows-latest, macos-latest]
-        arch: [x64]
-        # macOS does not support arm64 architecture directly
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Configure Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 22  # Spécifie la version de Node.js
           cache: 'npm'
 
       - name: Install dependencies
         run: npm install
 
-      - name: Build Windows (x64)
+      - name: Build Windows (NSIS)
         if: runner.os == 'Windows'
-        run: npm run build:win
+        run: npm run win
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Ajouter cette option pour ne pas publier automatiquement
+          CSC_IDENTITY_AUTO_DISCOVERY: false
 
-      - name: Build macOS (x64)
+      - name: Build macOS (DMG + ZIP)
         if: runner.os == 'macOS'
-        run: npm run build:mac-x64
+        run: npm run mac
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Ajouter cette option pour ne pas publier automatiquement
+          CSC_IDENTITY_AUTO_DISCOVERY: false
 
-      - name: Upload artifacts for Windows
+      - name: Upload build artifacts (Windows)
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@v4
         with:
-          name: NeoEarth-Windows-x64
+          name: NeoEarth-Windows
           path: dist/*.exe
 
-      - name: Upload artifacts for macOS
+      - name: Upload build artifacts (macOS)
         if: runner.os == 'macOS'
         uses: actions/upload-artifact@v4
         with:
-          name: NeoEarth-Mac-x64
+          name: NeoEarth-Mac
           path: |
             dist/*.dmg
             dist/*.zip

@@ -1,4 +1,3 @@
-/* Base Styles */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -13,13 +12,12 @@ body {
     background-size: cover;
     -webkit-user-drag: none; 
     -webkit-user-select: none;
-    overflow: hidden; /* Ensure no scrolling at all */
+    overflow: hidden; 
     height: 100vh;
     color: #fff;
 }
 
 
-/* Overlay avec dégradé sombre */
 body::before {
     content: '';
     position: fixed;
@@ -32,7 +30,6 @@ body::before {
     z-index: -1;
 }
 
-/* Animations */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-15px); }
     to { opacity: 1; transform: translateY(0); }
@@ -88,13 +85,11 @@ body::before {
     100% { box-shadow: 0 0 5px rgba(46, 204, 113, 0.3); }
 }
 
-/* Logo Shine Animation */
 @keyframes logoShine {
     0% { background-position: -100% 0; }
     100% { background-position: 200% 0; }
 }
 
-/* Utility Classes */
 .hidden {
     display: none !important;
 }
@@ -111,9 +106,6 @@ body::before {
     justify-content: space-between;
 }
 
-
-
-/* Badges */
 .badge {
     display: inline-block;
     padding: 0.25rem 0.75rem;
@@ -142,7 +134,6 @@ body::before {
     box-shadow: 0 2px 10px rgba(231, 76, 60, 0.3);
 }
 
-/* === LAYOUT STRUCTURE === */
 .app-layout {
     display: grid;
     grid-template-columns: 5rem 1fr;
@@ -156,17 +147,15 @@ body::before {
 }
 
 .social-menu {
-    /* Supprimez les propriétés left et transform ici */
     position: absolute;
     opacity: 0;
     visibility: hidden;
     z-index: 500;
     pointer-events: none;
-    /* Garder les autres styles mais supprimer les positionnements */
 }
 
 #menu.social-menu {
-    position: fixed; /* Utilisez fixed au lieu de absolute */
+    position: fixed;
     top: 60px;
     left: 50% !important;
     transform: translateX(-50%) !important;
@@ -178,13 +167,12 @@ body::before {
     padding: 5px 0;
     z-index: 1000;
     transition: opacity 0.3s ease, visibility 0.3s ease;
-    /* Ajout d'une marge pour éviter que le menu ne se ferme trop vite */
     margin-top: 10px;
 }
 
 #menu.social-menu li {
     cursor: pointer;
-    padding: 12px 15px; /* Augmente légèrement la taille des éléments */
+    padding: 12px 15px;
 }
 
 #menu.social-menu:not(.hidden) {
@@ -202,7 +190,7 @@ body::before {
 #menu.social-menu::after {
     content: '';
     position: absolute;
-    top: -20px; /* Zone invisible au-dessus du menu */
+    top: -20px; 
     left: 0;
     width: 100%;
     height: 20px;
@@ -229,7 +217,6 @@ body::before {
     transition: all 0.2s ease;
 }
 
-/* === LEFT SIDEBAR === */
 .navbar-left {
     position: fixed;
     left: 0;
@@ -245,7 +232,7 @@ body::before {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: 5rem; /* Augmenté pour faire de la place au logo */
+    padding-top: 5rem; 
 }
 
 .navbar-left-section {
@@ -286,7 +273,7 @@ body::before {
   }
 
 .navbar-left:before {
-    display: block; /* Afficher au lieu de cacher */
+    display: block; 
     content: '';
     position: absolute;
     top: 1rem;
@@ -314,13 +301,13 @@ nav ul {
     padding: 0;
     margin: 0;
     list-style: none;
-    height: 100%; /* Keep full height to allow flex positioning */
+    height: 100%;
     position: relative;
 }
 
 nav li {
     list-style-type: none;
-    margin: 0.6rem 0; /* Further reduced margin for better spacing */
+    margin: 0.6rem 0;
     padding: 0.6rem 0;
     width: 100%;
     text-align: center;
@@ -330,7 +317,7 @@ nav li {
 }
 
 nav li:not(:last-child) {
-    margin: 0.4rem 0; /* Reduced margin to fit them closer to the top */
+    margin: 0.4rem 0; 
     padding: 0.6rem 0;
 }
 
@@ -354,7 +341,7 @@ nav li:hover::after {
 nav a {
     text-decoration: none;
     color: rgba(255, 255, 255, 0.7);
-    font-size: 1.3rem; /* Reduced from 1.9rem to match icon size */
+    font-size: 1.3rem;
     transition: all 0.3s ease;
     display: block;
     width: 100%;
@@ -382,7 +369,7 @@ nav li:hover a {
 }
 
 nav li:last-child {
-    margin-top: auto; /* Push to the bottom */
+    margin-top: auto; 
     position: relative;
     margin-bottom: 0;
     width: 100%;
@@ -402,7 +389,7 @@ nav li:last-child::after {
     background: linear-gradient(to bottom, #e74c3c, #c0392b);
     transition: height 0.3s ease, box-shadow 0.3s ease;
     border-radius: 0 3px 3px 0;
-    z-index: 1; /* Above the background but below the icon */
+    z-index: 1; 
 }
 
 nav li:last-child i {
@@ -429,7 +416,7 @@ nav li:last-child:hover .social-menu {
     opacity: 1;
     visibility: visible;
     pointer-events: all;
-    bottom: 10px; /* Appear at the bottom of the screen instead */
+    bottom: 10px; 
 }
 
 
@@ -499,18 +486,15 @@ nav li.active i {
     margin-right: 0.5rem;
 }
 
-/* === LOGO STYLES - OPTIMIZED === */
 .navbar img.logo {
     height: 50px;
     width: 50px;
     margin-right: 1.2rem;
     filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.5));
     transition: all 0.3s ease;
-    content: url("../icon/logo.png") !important; /* Force le chargement absolu de l'image */
-    object-fit: contain;
+    content: url("../icon/logo.png") !important;
 }
 
-/* Logo fallback amélioré avec couleurs Earth */
 .navbar img.logo:not([src]), 
 .navbar img.logo[src=""], 
 .navbar img.logo[src="null"] {
@@ -552,9 +536,8 @@ nav li.active i {
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-/* NeoEarth-MC title amélioré - Plus petit et plus coloré */
 .navbar h3.title {
-    font-size: 18px; /* Réduit de 20px à 18px */
+    font-size: 18px;
     background: linear-gradient(to right, #27ae60, #2ecc71, #3498db, #85c1e9);
     background-size: 200% 100%;
     -webkit-background-clip: text;
@@ -592,7 +575,6 @@ nav li.active i {
     letter-spacing: 0.5px;
 }
 
-/* === PLAYER CARD - POSITION CORRIGÉE === */
 .card-player {
     display: flex;
     align-items: center;
@@ -690,7 +672,7 @@ nav li.active i {
     font-size: 24px;
     color: rgba(255, 255, 255, 0.8);
     cursor: pointer;
-    margin: 0 1rem; /* Add margin on both sides for each icon */
+    margin: 0 1rem; 
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -703,7 +685,7 @@ nav li.active i {
 .navbar-icon.notifications {
     margin-left: 2rem;
 }
-/* === DROPDOWN MENU - RÉAJUSTÉ === */
+
 #menu {
     position: absolute;
     top: 4rem;
@@ -770,11 +752,10 @@ nav li.active i {
     box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
 
-/* === MAIN CONTAINER - AJUSTÉ === */
 .container {
     position: relative;
     margin-left: 5rem;
-    padding: 5rem 2rem 2rem; /* Reduced top padding */
+    padding: 5rem 2rem 2rem; 
     height: 100vh;
     display: flex;
     flex-direction: column;
@@ -782,11 +763,10 @@ nav li.active i {
     z-index: 10;
 }
 
-/* NeoEarth-MC title with Earth gradient */
 .container h1 {
-    font-size: 2.5rem; /* Reduced from 3rem */
+    font-size: 2.5rem; 
     font-weight: 800;
-    margin-bottom: 1.5rem; /* Reduced from 2.5rem */
+    margin-bottom: 1.5rem;
     text-transform: uppercase;
     letter-spacing: 3px;
     text-shadow: 0 3px 12px rgba(0, 0, 0, 0.7);
@@ -796,7 +776,6 @@ nav li.active i {
     -webkit-text-fill-color: transparent;
 }
 
-/* === CONTENT GRID === */
 .content-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -805,7 +784,6 @@ nav li.active i {
     width: 100%;
 }
 
-/* === LAUNCH BUTTON === */
 .container button.launch {
     display: flex;
     align-items: center;
@@ -897,7 +875,6 @@ nav li.active i {
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
 }
 
-/* === LOG CONSOLE - OPTIMISÉ === */
 .LogConsole {
     position: fixed;
     top: 50%;
@@ -1008,7 +985,6 @@ nav li.active i {
     gap: 1rem;
 }
 
-/* Logo dans la console de logs amélioré */
 .LogConsole img.logo {
     position: absolute;
     top: 16px;
@@ -1216,10 +1192,9 @@ nav li.active i {
     color: #e74c3c;
 }
 
-/* === NEWS CARDS - BRING TO FOREGROUND === */
 .cards-container {
     overflow-x: auto;
-    overflow-y: hidden; /* Ensure no vertical scrolling */
+    overflow-y: hidden; 
     margin-bottom: 2rem;
     padding: 1rem 2rem;
     display: flex;
@@ -1229,9 +1204,9 @@ nav li.active i {
     -webkit-overflow-scrolling: touch;
     scroll-snap-type: x mandatory;
     position: relative;
-    z-index: 500; /* Extreme z-index to ensure they're on top */
+    z-index: 500;
     height: auto;
-    max-height: 400px; /* Reduced height to prevent cutting off */
+    max-height: 400px; 
 }
 
 .card-news {
@@ -1243,7 +1218,7 @@ nav li.active i {
     transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
     display: flex;
     flex-direction: column;
-    height: 360px; /* Reduced from 320px to ensure full visibility */
+    height: 360px;
     min-width: 300px;
     max-width: 350px;
     flex: 0 0 auto;
@@ -1251,14 +1226,14 @@ nav li.active i {
     scroll-snap-align: start;
     animation: fadeIn 0.5s ease;
     margin: 1px;
-    z-index: 501; /* Even higher z-index */
+    z-index: 501;
     transform: translateY(0);
 }
 
 .card-news .author-section {
     padding: 14px 16px;
-    height: auto; /* Hauteur automatique pour s'adapter au contenu */
-    min-height: 65px; /* Hauteur minimale pour uniformité */
+    height: auto;
+    min-height: 65px;
   }
 
 .card-news .author-news {
@@ -1266,12 +1241,12 @@ nav li.active i {
     font-weight: 600;
     color: #fff;
     margin: 0;
-    white-space: normal; /* Permet le retour à la ligne */
-    overflow: visible; /* Empêche la troncation */
-    text-overflow: clip; /* Désactive l'ellipsis */
+    white-space: normal; 
+    overflow: visible;
+    text-overflow: clip; 
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-    line-height: 1.2; /* Espace les lignes pour une meilleure lisibilité */
-    max-height: 2.4em; /* Limite à environ 2 lignes */
+    line-height: 1.2; 
+    max-height: 2.4em; 
 }
 
 .card-news .author-info {
@@ -1280,8 +1255,8 @@ nav li.active i {
     flex-direction: column;
     justify-content: center;
     flex-grow: 1;
-    width: calc(100% - 45px); /* Assure que l'info ne déborde pas */
-    min-width: 0; /* Force le conteneur à permettre la réduction */
+    width: calc(100% - 45px);
+    min-width: 0; 
 }
 
 .card-news .date-news {
@@ -1294,15 +1269,15 @@ nav li.active i {
 }
 
 .card-news .date-badge {
-    display: inline-block; /* Rétablit l'affichage */
+    display: inline-block; 
     position: absolute;
     right: 10px;
     bottom: 10px;
-    font-size: 11px; /* Taille réduite */
+    font-size: 11px; 
     font-weight: 600;
     background: linear-gradient(to right, #27ae60, #2ecc71);
-    padding: 4px 8px; /* Padding réduit */
-    border-radius: 10px; /* Arrondi plus petit */
+    padding: 4px 8px; 
+    border-radius: 10px; 
     color: white;
     letter-spacing: 0.5px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
@@ -1311,9 +1286,9 @@ nav li.active i {
     text-transform: uppercase;
     border: 1px solid rgba(255, 255, 255, 0.15);
     z-index: 5;
-    text-shadow: none; /* Supprime l'ombre de texte */
+    text-shadow: none;
     transform: scale(1);
-    animation: none; /* Supprime l'animation constante */
+    animation: none; 
 }
 
 .card-news:hover .date-badge {
@@ -1350,7 +1325,6 @@ nav li.active i {
     border-color: rgba(46, 204, 113, 0.3);
 }
 
-/* Fix for broken images amélioré */
 .card-news img.news:not([src]),
 .card-news img.news[src=""],
 .card-news img.news[src="null"] {
@@ -1370,7 +1344,7 @@ nav li.active i {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 20px; /* Réduit pour meilleur affichage */
+    font-size: 20px; 
     font-weight: 700;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
     background: linear-gradient(to right, #27ae60, #2ecc71, #3498db, #85c1e9);
@@ -1410,3 +1384,4 @@ nav li.active i {
     color: white;
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
 }
+

@@ -74,3 +74,43 @@ body {
     color: white;
     font-size: 70px;
 }
+
+/* Window Controls */
+.navbar-right-section {
+    display: flex;
+    align-items: center;
+    margin-right: 0.5rem;
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 1rem;
+  }
+  
+  .navbar-icon {
+    font-size: 24px;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    margin: 0 0.5rem;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  
+  .window-control {
+    font-size: 20px;
+    margin-left: 1rem;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  
+  #minimize:hover {
+    color: #f1c40f;
+    text-shadow: 0 0 10px rgba(241, 196, 15, 0.6);
+  }
+  
+  #maximize:hover {
+    color: #3498db;
+    text-shadow: 0 0 10px rgba(52, 152, 219, 0.6);
+  }
+  
+  #close:hover {
+    color: #e74c3c;
+    text-shadow: 0 0 10px rgba(231, 76, 60, 0.6);
+  }

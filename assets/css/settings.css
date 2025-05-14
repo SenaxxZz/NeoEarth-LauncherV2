@@ -25,10 +25,6 @@ body {
     z-index: 0;
 }
 
-/*-------------------------------------*\
-  LEFT SIDEBAR NAVIGATION
-\*-------------------------------------*/
-
 .navbar-left {
     position: fixed;
     left: 0;
@@ -44,11 +40,11 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: 5rem; /* Augmenté pour faire de la place au logo */
+    padding-top: 5rem; 
 }
 
 .navbar-left:before {
-    display: block; /* Afficher au lieu de cacher */
+    display: block; 
     content: '';
     position: absolute;
     top: 1rem;
@@ -76,13 +72,13 @@ nav ul {
     padding: 0;
     margin: 0;
     list-style: none;
-    height: 100%; /* Keep full height to allow flex positioning */
+    height: 100%; 
     position: relative;
 }
 
 nav li {
     list-style-type: none;
-    margin: 0.6rem 0; /* Further reduced margin for better spacing */
+    margin: 0.6rem 0;
     padding: 0.6rem 0;
     width: 100%;
     text-align: center;
@@ -110,14 +106,14 @@ nav li.active i {
 }
 
 nav li:not(:last-child) {
-    margin: 0.4rem 0; /* Reduced margin to fit them closer to the top */
+    margin: 0.4rem 0;
     padding: 0.6rem 0;
 }
 
 nav a {
     text-decoration: none;
     color: rgba(255, 255, 255, 0.7);
-    font-size: 1.3rem; /* Reduced from 1.9rem to match icon size */
+    font-size: 1.3rem;
     transition: all 0.3s ease;
     display: block;
     width: 100%;
@@ -161,28 +157,24 @@ nav li:hover a {
     text-shadow: 0 0 12px rgba(46, 204, 113, 0.5);
 }
 
-
-/* FIXED: Disconnect Button with proper half-width highlight */
 nav li#disconnect1,
 nav li:last-child {
-    margin-top: auto; /* Push to the bottom */
+    margin-top: auto; 
     position: relative;
-    margin-bottom: 0; /* Changed from 0.5rem to match main.css */
+    margin-bottom: 0;
     width: 100%;
     text-align: center;
     padding-top: 1rem;
     border-top: 1px solid rgba(255, 255, 255, 0.05);
-    overflow: visible; /* Allow animation overflow */
+    overflow: visible;
 }
 
 
-/* Hide default hover background for disconnect button only */
 nav li#disconnect1:hover,
 nav li:last-child:hover {
     background-color: rgba(255, 120, 120, 0.15);
 }
 
-/* Edge indicator with better positioning */
 nav li#disconnect1::after,
 nav li:last-child::after {
     content: '';
@@ -195,7 +187,7 @@ nav li:last-child::after {
     background: linear-gradient(to bottom, #e74c3c, #c0392b);
     transition: height 0.3s ease, box-shadow 0.3s ease;
     border-radius: 0 3px 3px 0;
-    z-index: 1; /* Above the background but below the icon */
+    z-index: 1; 
     animation: edgePulse 1.5s infinite alternate;
 }
 
@@ -227,10 +219,6 @@ nav li:last-child:hover i {
     color: #e74c3c;
     text-shadow: 0 0 12px rgba(231, 76, 60, 0.5);
 }
-
-/*-------------------------------------*\
-  SIDE MENU / OPTIONS BAR
-\*-------------------------------------*/
 
 menu.bar {
     position: fixed;
@@ -295,10 +283,6 @@ menu.bar h4:hover {
     transform: translateX(5px);
 }
 
-/*-------------------------------------*\
-  MAIN CONTENT AREA
-\*-------------------------------------*/
-
 menu {
     position: fixed;
     top: 0;
@@ -335,11 +319,6 @@ menu h2::after {
     border-radius: 3px;
 }
 
-/*-------------------------------------*\
-  RAM SLIDER - ENHANCED
-\*-------------------------------------*/
-
-/* IMPROVED: Add ripple effect container */
 .ram-slider-container {
     background: rgba(0, 0, 0, 0.2);
     border-radius: 12px;
@@ -348,7 +327,7 @@ menu h2::after {
     box-shadow: inset 0 1px 5px rgba(0, 0, 0, 0.2);
     border: 1px solid rgba(255, 255, 255, 0.05);
     position: relative;
-    overflow: hidden; /* Ensure ripple stays contained */
+    overflow: hidden; 
 }
 
 .ram-slider-container::before {
@@ -369,7 +348,6 @@ menu h2::after {
     opacity: 1;
 }
 
-/* NEW: Click ripple effect */
 .ram-slider-container::after {
     content: '';
     position: absolute;
@@ -435,7 +413,6 @@ menu h2::after {
     animation: ramValueShine 3s infinite;
 }
 
-/* NEW: Added value glow animation when slider clicked */
 .ram-slider-container.clicked .ram-value {
     animation: valueGlow 0.8s;
 }
@@ -451,7 +428,6 @@ menu h2::after {
     20%, 100% { transform: translateX(100%) rotate(45deg); }
 }
 
-/* IMPROVED RAM slider with better interactive feedback */
 .ram-slider-container input[type="range"] {
     -webkit-appearance: none;
     width: 100%;
@@ -466,7 +442,6 @@ menu h2::after {
     z-index: 1;
 }
 
-/* Interactive track styling */
 .ram-slider-container input[type="range"]::-webkit-slider-runnable-track {
     height: 12px;
     border-radius: 10px;
@@ -478,7 +453,6 @@ menu h2::after {
     transition: background 0.3s ease, box-shadow 0.2s ease;
 }
 
-/* IMPROVED: Enhanced track with better click feedback */
 .ram-slider-container input[type="range"]:active::-webkit-slider-runnable-track {
     box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.5);
 }
@@ -491,7 +465,6 @@ menu h2::after {
     );
 }
 
-/* Enhanced thumb styling */
 .ram-slider-container input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     width: 28px;
@@ -501,13 +474,12 @@ menu h2::after {
     cursor: pointer;
     border: 2px solid rgba(255, 255, 255, 0.9);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
-    margin-top: -8px; /* Center thumb vertically */
+    margin-top: -8px;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     position: relative;
     z-index: 10;
 }
 
-/* IMPROVED: Dramatic active state with glow and pulse */
 .ram-slider-container input[type="range"]:active::-webkit-slider-thumb {
     transform: scale(1.5);
     background: linear-gradient(135deg, #33d67b, #2ecc71);
@@ -525,7 +497,6 @@ menu h2::after {
     box-shadow: 0 0 15px rgba(46, 204, 113, 0.6);
 }
 
-/* Firefox styles */
 .ram-slider-container input[type="range"]::-moz-range-track {
     height: 12px;
     border-radius: 10px;
@@ -547,7 +518,6 @@ menu h2::after {
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* IMPROVED: Firefox active state */
 .ram-slider-container input[type="range"]:active::-moz-range-thumb {
     transform: scale(1.5);
     background: linear-gradient(135deg, #33d67b, #2ecc71);
@@ -559,7 +529,6 @@ menu h2::after {
     box-shadow: 0 0 15px rgba(46, 204, 113, 0.6);
 }
 
-/* Min/max indicators */
 .ram-min-max {
     display: flex;
     justify-content: space-between;
@@ -583,10 +552,6 @@ menu h2::after {
     background: rgba(46, 204, 113, 0.3);
     border-radius: 2px;
 }
-
-/*-------------------------------------*\
-  FORM CONTROLS
-\*-------------------------------------*/
 
 label.divers {
     display: inline-block;
@@ -666,9 +631,6 @@ input.option-launcher:checked::after {
     left: calc(100% - 22px);
 }
 
-/*-------------------------------------*\
-  SETTINGS SECTIONS
-\*-------------------------------------*/
 
 .SettingsModsAddionnel, 
 .SettingsSrcPack, 
@@ -686,7 +648,6 @@ input.option-launcher:checked::after {
     overflow-y: auto;
 }
 
-/* IMPROVED checkbox position to LEFT with better styling */
 .SettingsModsAddionnel label {
     display: flex;
     align-items: center;
@@ -708,7 +669,6 @@ input.option-launcher:checked::after {
     transform: translateX(3px);
 }
 
-/* IMPROVED: Forced checkbox position with enhanced specificity */
 .SettingsModsAddionnel input[type="checkbox"] {
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -724,12 +684,11 @@ input.option-launcher:checked::after {
     position: relative;
     flex-shrink: 0;
     flex-grow: 0;
-    order: -1 !important; /* Always first */
+    order: -1 !important; 
     outline: none;
     transition: all 0.2s ease;
 }
 
-/* IMPROVED: Improved checkbox spacing and alignment */
 .SettingsModsAddionnel span, 
 .SettingsModsAddionnel div {
     margin-left: 5px;
@@ -759,7 +718,6 @@ input.option-launcher:checked::after {
     transform: rotate(45deg);
 }
 
-/* Enhanced hover effect for mod options */
 .SettingsModsAddionnel label::before {
     content: '';
     position: absolute;
@@ -794,9 +752,6 @@ input.option-launcher:checked::after {
     transform: translateX(3px);
 }
 
-/*-------------------------------------*\
-  BUTTONS
-\*-------------------------------------*/
 
 #copyFileButton, #copyFileButton1 {
     background: linear-gradient(to right, #27ae60, #2ecc71);
@@ -825,9 +780,6 @@ input.option-launcher:checked::after {
     box-shadow: 0 2px 5px rgba(46, 204, 113, 0.4);
 }
 
-/*-------------------------------------*\
-  PROFILE ACCOUNT
-\*-------------------------------------*/
 
 .ProfilAccount .box-card {
     background: linear-gradient(135deg, rgba(30, 60, 30, 0.8), rgba(20, 40, 20, 0.8));
@@ -878,10 +830,6 @@ input.option-launcher:checked::after {
     transform: scale(1.05);
 }
 
-/*-------------------------------------*\
-  CUSTOM SCROLLBARS
-\*-------------------------------------*/
-
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -900,3 +848,43 @@ input.option-launcher:checked::after {
 ::-webkit-scrollbar-thumb:hover {
     background: linear-gradient(to bottom, #33d67b, #2ecc71);
 }
+
+/* Window Controls */
+.navbar-right-section {
+    display: flex;
+    align-items: center;
+    margin-right: 0.5rem;
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 1rem;
+  }
+  
+  .navbar-icon {
+    font-size: 24px;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    margin: 0 0.5rem;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  
+  .window-control {
+    font-size: 20px;
+    margin-left: 1rem;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  
+  #minimize:hover {
+    color: #f1c40f;
+    text-shadow: 0 0 10px rgba(241, 196, 15, 0.6);
+  }
+  
+  #maximize:hover {
+    color: #3498db;
+    text-shadow: 0 0 10px rgba(52, 152, 219, 0.6);
+  }
+  
+  #close:hover {
+    color: #e74c3c;
+    text-shadow: 0 0 10px rgba(231, 76, 60, 0.6);
+  }

@@ -47,7 +47,7 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-/* Remove icon styles */
+
 .form-container i#users {
     display: none;
 }
@@ -61,7 +61,7 @@ body {
     color: #fff;
     font-size: 1.7rem;
     font-weight: 600;
-    margin: 0 0 1.8rem 0; /* Adjusted top margin since we removed the icon */
+    margin: 0 0 1.8rem 0; 
     text-transform: uppercase;
     letter-spacing: 1px;
     text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
@@ -69,7 +69,7 @@ body {
 
 input {
     width: 100%;
-    padding: 1rem; /* Simplified padding since we removed the icons */
+    padding: 1rem; 
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 0.7rem;
@@ -142,7 +142,6 @@ h5:hover {
     display: none;
 }
 
-/* Message d'erreur styling */
 #message {
     display: none;
     position: fixed;
@@ -191,3 +190,43 @@ h5:hover {
     margin-top: 0.7rem;
     line-height: 1.5;
 }
+
+/* Window Controls */
+.navbar-right-section {
+    display: flex;
+    align-items: center;
+    margin-right: 0.5rem;
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 1rem;
+  }
+  
+  .navbar-icon {
+    font-size: 24px;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    margin: 0 0.5rem;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  
+  .window-control {
+    font-size: 20px;
+    margin-left: 1rem;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  
+  #minimize:hover {
+    color: #f1c40f;
+    text-shadow: 0 0 10px rgba(241, 196, 15, 0.6);
+  }
+  
+  #maximize:hover {
+    color: #3498db;
+    text-shadow: 0 0 10px rgba(52, 152, 219, 0.6);
+  }
+  
+  #close:hover {
+    color: #e74c3c;
+    text-shadow: 0 0 10px rgba(231, 76, 60, 0.6);
+  }

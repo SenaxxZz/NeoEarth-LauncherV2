@@ -36,6 +36,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         } 
     });
 
+document.addEventListener('DOMContentLoaded', () => {
+  // Window controls
+  document.getElementById("close")?.addEventListener("click", () => {
+    ipcRenderer.send("quit");
+  });
+
+  document.getElementById("minimize")?.addEventListener("click", () => {
+    ipcRenderer.send("minimize");
+  });
+
+  document.getElementById("maximize")?.addEventListener("click", () => {
+    ipcRenderer.send("maximize");
+  });
+});
+
 function handleLoginError(response) {
     const formContainer = document.getElementById("form-container");
     const emailInput = document.getElementById("email");
