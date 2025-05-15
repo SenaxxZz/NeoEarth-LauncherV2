@@ -3,37 +3,26 @@ name: Build Application
 on:
   push:
     branches: [ main, master ]
-    tags: [ 'v*' ]  # Se déclenche sur les tags commençant par v (ex: v1.0.0)
+    tags: [ 'v*' ]
   pull_request:
     branches: [ main, master ]
-  workflow_dispatch:  # Permet de déclencher manuellement
+  workflow_dispatch:
 
 jobs:
   build:
     strategy:
       matrix:
         include:
-          # Windows builds
+          # Windows x64
           - os: windows-latest
             arch: x64
             platform: win
-          - os: windows-latest
-            arch: ia32
-            platform: win
-          # macOS builds
+          # macOS Intel (x64)
           - os: macos-latest
             arch: x64
             platform: mac
             build-script: mac:intel
-          - os: macos-latest
-            arch: arm64
-            platform: mac
-            build-script: mac:arm
-          - os: macos-latest
-            arch: universal
-            platform: mac
-            build-script: mac:universal
-    
+
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -43,11 +32,11 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22  # Spécifie la version de Node.js
+          node-version: 22
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build Windows (NSIS)
         if: matrix.platform == 'win'

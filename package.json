@@ -1,19 +1,12 @@
 {
   "name": "NeoEarth-MC",
   "version": "1.0.4",
-  "publicVersion": "1.0.4",
   "description": "Launcher officiel",
   "main": "Main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
-    "win": "electron-builder --windows",
-    "win:x64": "electron-builder --windows --x64",
-    "win:ia32": "electron-builder --windows --ia32",
-    "mac": "electron-builder --mac",
-    "mac:intel": "electron-builder --mac --x64",
-    "mac:arm": "electron-builder --mac --arm64",
-    "mac:universal": "electron-builder --mac --universal"
+    "win": "electron-builder --windows --x64",
+    "mac:intel": "electron-builder --mac --x64"
   },
   "keywords": [],
   "author": "NeoEarth-MC",
@@ -30,19 +23,24 @@
     "electron-store": "^8.1.0",
     "express": "^4.18.3",
     "express-handlebars": "^7.1.2",
-    "fs": "^0.0.1-security",
     "minecraft-launcher-core": "^3.18.2",
     "nodejs-file-downloader": "^4.13.0",
     "xml-js": "^1.6.11"
   },
   "build": {
+    "files": [
+      "dist/",
+      "build/",
+      "Main.js",
+      "package.json"
+    ],
     "win": {
       "icon": "./assets/icon/logo.png",
       "publisherName": "NeoEarth-MC",
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64", "ia32"]
+          "arch": ["x64"]
         }
       ],
       "artifactName": "${productName}-${version}-windows-${arch}.${ext}"
@@ -52,11 +50,11 @@
       "target": [
         {
           "target": "dmg",
-          "arch": ["x64", "arm64", "universal"]
+          "arch": ["x64"]
         },
         {
           "target": "zip",
-          "arch": ["x64", "arm64", "universal"]
+          "arch": ["x64"]
         }
       ],
       "artifactName": "${productName}-${version}-mac-${arch}.${ext}",
