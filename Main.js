@@ -36,14 +36,27 @@ const createWindow = () => {
     show: false,
     center: true,
     webPreferences: {
-      nodeIntegration: true,
+      nodeIntegration: false,           // Désactive Node.js dans le renderer
       devTools: true,
-      nodeIntegrationInWorker: true,
-      enableRemoteModule: true,
-      webSecurity: true,
-      contextIsolation: false,
+      contextIsolation: true,           // Isole le contexte JS
+      webSecurity: true,                // Empêche le chargement de ressources locales
+      preload: path.join(__dirname, "preload.js") // Utilise un preload sécurisé
     }
   });
+
+// Bloque toute navigation vers file:// sauf le fichier principal
+mainWindow.webContents.on('will-navigate', (event, url) => {
+  if (url.startsWith('file://') && !url.endsWith('login.html') && !url.endsWith('index.html')) {
+    event.preventDefault();
+  }
+});
+
+mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+  if (url.startsWith('file://')) {
+    return { action: 'deny' };
+  }
+  return { action: 'allow' };
+});
 
   mainWindow.isCustomMaximized = false;
   
