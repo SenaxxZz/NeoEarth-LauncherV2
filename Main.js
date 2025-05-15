@@ -35,12 +35,12 @@ const createWindow = () => {
     resizable: false,
     show: false,
     center: true,
-    webPreferences: {
-      nodeIntegration: false,           // Désactive Node.js dans le renderer
-      devTools: true,
-      contextIsolation: true,           // Isole le contexte JS
-      webSecurity: true,                // Empêche le chargement de ressources locales
-      preload: path.join(__dirname, "preload.js") // Utilise un preload sécurisé
+  webPreferences: {
+    nodeIntegration: false,
+    devTools: true,
+    contextIsolation: true,
+    webSecurity: true,
+    preload: path.join(__dirname, "assets/js/preload.js")
     }
   });
 
